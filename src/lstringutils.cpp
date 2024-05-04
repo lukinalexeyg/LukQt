@@ -9,14 +9,7 @@ static const QString s_falseString("false");
 
 
 
-QTextCodec *LStringUtils::windows1251TextCodec()
-{
-    return QTextCodec::codecForMib(Mib::Windows1251);
-}
-
-
-
-QString LStringUtils::fromLocal8Bit(const char *string, const Mib mib)
+QString LStringUtils::fromLocal8Bit(const char *string, const Mib mib, int size)
 {
     QTextCodec *textCodec = QTextCodec::codecForMib(mib);
     if (textCodec == nullptr)
@@ -24,7 +17,7 @@ QString LStringUtils::fromLocal8Bit(const char *string, const Mib mib)
 
     QTextCodec *oldTextCodec = QTextCodec::codecForLocale();
     QTextCodec::setCodecForLocale(textCodec);
-    QString newString = QString::fromLocal8Bit(string);
+    QString newString = QString::fromLocal8Bit(string, size);
     QTextCodec::setCodecForLocale(oldTextCodec);
 
     return newString;
@@ -197,10 +190,10 @@ QString LStringUtils::concatStrings(const QString &string1, const QChar &c, cons
 
 
 QString LStringUtils::concatStrings(const QString &string1,
-                                   const QChar &c1,
-                                   const QString &string2,
-                                   const QChar &c2,
-                                   const QString &string3)
+                                    const QChar &c1,
+                                    const QString &string2,
+                                    const QChar &c2,
+                                    const QString &string3)
 {
     QString result = string1;
     result.reserve(string1.size() + string2.size() + string3.size() + 2);
@@ -280,9 +273,9 @@ QString LStringUtils::chopString(const QString &string, const QString &fromWhat)
 
 
 QString LStringUtils::wordWrapText(const QString &string,
-                                  const int length,
-                                  const JustifyOrientation justifyOrientation,
-                                  const WordWrapPolicy wordWrapPolicy)
+                                   const int length,
+                                   const JustifyOrientation justifyOrientation,
+                                   const WordWrapPolicy wordWrapPolicy)
 {
     const QStringList stringList = string.split(LChars::Control::LF);
     QStringList resultStringList;
@@ -301,9 +294,9 @@ QString LStringUtils::wordWrapText(const QString &string,
 
 
 QStringList LStringUtils::wordWrapString(const QString &string,
-                                        const int length,
-                                        const JustifyOrientation justifyOrientation,
-                                        const WordWrapPolicy wordWrapPolicy)
+                                         const int length,
+                                         const JustifyOrientation justifyOrientation,
+                                         const WordWrapPolicy wordWrapPolicy)
 {
     QString _string = string.simplified();
     const QStringList list0 = _string.split(LChars::space, QString::SkipEmptyParts);
