@@ -6,6 +6,7 @@ HEADERS += \
     $$PWD/lcolorutils.h \
     $$PWD/lcrashhandler.h \
     $$PWD/lfileutils.h \
+    $$PWD/lftp.h \
     $$PWD/llog.h \
     $$PWD/lmacros.h \
     $$PWD/lnetworkutils.h \
@@ -21,6 +22,7 @@ SOURCES += \
     $$PWD/lcolorutils.cpp \
     $$PWD/lcrashhandler.cpp \
     $$PWD/lfileutils.cpp \
+    $$PWD/lftp.cpp \
     $$PWD/llog.cpp \
     $$PWD/lnetworkutils.cpp \
     $$PWD/lnumberutils.cpp \
@@ -33,6 +35,3 @@ win32-msvc* {
     LIBS += -lAdvapi32
     LIBS += -lDbgHelp
 }
-
-SUBDIRS += \
-    $$PWD/LukQt.pro
