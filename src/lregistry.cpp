@@ -1,9 +1,7 @@
 #include "lregistry.h"
 
-#include "llog.h"
 #include "lmacros.h"
 
-#include <QApplication>
 #include <QSettings>
 
 
@@ -50,52 +48,52 @@ QStringList LRegistry::childGroups(const QString &path)
 
 #ifdef Q_OS_WIN
 
-QString LRegistry::readString(HKEY hKey, LPCWSTR valueName)
+QString LRegistry::readString(HKEY hKey, LPCWSTR valueName, LSTATUS *status)
 {
     QString result;
     DWORD dwSize = 0;
 
-    LSTATUS status = RegQueryValueEx(hKey, valueName, NULL, NULL, NULL, &dwSize);
+    LSTATUS _status = RegQueryValueEx(hKey, valueName, NULL, NULL, NULL, &dwSize);
 
-    if (status == ERROR_SUCCESS) {
+    if (_status == ERROR_SUCCESS) {
         DWORD dwType = REG_SZ;
         LPBYTE pBuffer = new BYTE[dwSize];
 
-        status = RegQueryValueEx(hKey, valueName, NULL, &dwType, pBuffer, &dwSize);
+        _status = RegQueryValueEx(hKey, valueName, NULL, &dwType, pBuffer, &dwSize);
 
-        if (status == ERROR_SUCCESS)
+        if (_status == ERROR_SUCCESS)
             result = QString::fromWCharArray(R_CAST_LPWSTR(pBuffer));
 
         delete [] pBuffer;
     }
 
-    if (status != ERROR_SUCCESS)
-        WARNING_LOG status;
+    if (status != nullptr)
+        *status = _status;
 
     return result;
 }
 
 
 
-QString LRegistry::readString(HKEY hKey, LPCWSTR path, LPCWSTR valueName)
+QString LRegistry::readString(HKEY hKey, LPCWSTR path, LPCWSTR valueName, LSTATUS *status)
 {
     HKEY phkResult;
     QString result;
 
-    LSTATUS status = RegOpenKeyEx(hKey, path, 0, KEY_READ | KEY_WOW64_64KEY, &phkResult);
+    LSTATUS _status = RegOpenKeyEx(hKey, path, 0, KEY_READ | KEY_WOW64_64KEY, &phkResult);
 
-    if (status == ERROR_SUCCESS) {
+    if (_status == ERROR_SUCCESS) {
         DWORD dwType = REG_SZ;
         DWORD dwSize = 0;
 
-        status = RegQueryValueEx(phkResult, valueName, NULL, &dwType, NULL, &dwSize);
+        _status = RegQueryValueEx(phkResult, valueName, NULL, &dwType, NULL, &dwSize);
 
-        if (status == ERROR_SUCCESS) {
+        if (_status == ERROR_SUCCESS) {
             LPBYTE pBuffer = new BYTE[dwSize];
 
-            status = RegQueryValueEx(phkResult, valueName, NULL, &dwType, pBuffer, &dwSize);
+            _status = RegQueryValueEx(phkResult, valueName, NULL, &dwType, pBuffer, &dwSize);
 
-            if (status == ERROR_SUCCESS)
+            if (_status == ERROR_SUCCESS)
                 result = QString::fromWCharArray(R_CAST_LPWSTR(pBuffer));
 
             delete [] pBuffer;
@@ -104,33 +102,33 @@ QString LRegistry::readString(HKEY hKey, LPCWSTR path, LPCWSTR valueName)
         RegCloseKey(phkResult);
     }
 
-    if (status != ERROR_SUCCESS)
-        WARNING_LOG status;
+    if (status != nullptr)
+        *status = _status;
 
     return result;
 }
 
 
 
-QByteArray LRegistry::readByteArray(HKEY hKey, LPCWSTR path, LPCWSTR valueName)
+QByteArray LRegistry::readByteArray(HKEY hKey, LPCWSTR path, LPCWSTR valueName, LSTATUS *status)
 {
     HKEY phkResult;
     QByteArray result;
 
-    LSTATUS status = RegOpenKeyEx(hKey, path, 0, KEY_READ | KEY_WOW64_64KEY, &phkResult);
+    LSTATUS _status = RegOpenKeyEx(hKey, path, 0, KEY_READ | KEY_WOW64_64KEY, &phkResult);
 
-    if (status == ERROR_SUCCESS) {
+    if (_status == ERROR_SUCCESS) {
         DWORD dwType = REG_BINARY;
         DWORD dwSize = 0;
 
-        status = RegQueryValueEx(phkResult, valueName, NULL, &dwType, NULL, &dwSize);
+        _status = RegQueryValueEx(phkResult, valueName, NULL, &dwType, NULL, &dwSize);
 
-        if (status == ERROR_SUCCESS) {
+        if (_status == ERROR_SUCCESS) {
             LPBYTE pBuffer = new BYTE[dwSize];
 
-            status = RegQueryValueEx(phkResult, valueName, NULL, &dwType, pBuffer, &dwSize);
+            _status = RegQueryValueEx(phkResult, valueName, NULL, &dwType, pBuffer, &dwSize);
 
-            if (status == ERROR_SUCCESS)
+            if (_status == ERROR_SUCCESS)
                 result = QByteArray(R_CAST_LPSTR(pBuffer), dwSize);
 
             delete [] pBuffer;
@@ -139,131 +137,141 @@ QByteArray LRegistry::readByteArray(HKEY hKey, LPCWSTR path, LPCWSTR valueName)
         RegCloseKey(phkResult);
     }
 
-    if (status != ERROR_SUCCESS)
-        WARNING_LOG status;
+    if (status != nullptr)
+        *status = _status;
 
     return result;
 }
 
 
 
-int LRegistry::readInt(HKEY hKey, LPCWSTR path, LPCWSTR valueName)
+int LRegistry::readInt(HKEY hKey, LPCWSTR path, LPCWSTR valueName, LSTATUS *status)
 {
     HKEY phkResult;
     int result = 0;
 
-    LSTATUS status = RegOpenKeyEx(hKey, path, 0, KEY_READ | KEY_WOW64_64KEY, &phkResult);
+    LSTATUS _status = RegOpenKeyEx(hKey, path, 0, KEY_READ | KEY_WOW64_64KEY, &phkResult);
 
-    if (status == ERROR_SUCCESS) {
+    if (_status == ERROR_SUCCESS) {
         DWORD dwType = REG_DWORD;
         DWORD data = 0;
         DWORD dwSize = 0;
 
-        status = RegQueryValueEx(phkResult, valueName, NULL, &dwType, (LPBYTE)&data, &dwSize);
+        _status = RegQueryValueEx(phkResult, valueName, NULL, &dwType, (LPBYTE)&data, &dwSize);
 
-        if (status == ERROR_SUCCESS)
+        if (_status == ERROR_SUCCESS)
             result = S_CAST_INT(data);
 
         RegCloseKey(phkResult);
     }
 
-    if (status != ERROR_SUCCESS)
-        WARNING_LOG status;
+    if (status != nullptr)
+        *status = _status;
 
     return result;
 }
 
 
 
-bool LRegistry::write(HKEY hKey, LPCWSTR path, LPCWSTR valueName, const QString &data, const bool createSubKeys)
+bool LRegistry::write(HKEY hKey,
+                      LPCWSTR path,
+                      LPCWSTR valueName,
+                      const QString &data,
+                      const bool createSubKeys,
+                      LSTATUS *status)
 {
-    return write(hKey, path, valueName, REG_SZ, (const LPBYTE)data.utf16(), data.size()*2, createSubKeys);
-}
-
-
-
-bool LRegistry::write(HKEY hKey, LPCWSTR path, LPCWSTR valueName, const QByteArray &data, const bool createSubKeys)
-{
-    return write(hKey, path, valueName, REG_BINARY, (const LPBYTE)data.data(), data.size(), createSubKeys);
-}
-
-
-
-bool LRegistry::write(HKEY hKey, LPCWSTR path, LPCWSTR valueName, const int data, const bool createSubKeys)
-{
-    return write(hKey, path, valueName, REG_DWORD, (const LPBYTE)&data, sizeof(DWORD), createSubKeys);
+    return write(hKey, path, valueName, REG_SZ, (const LPBYTE)data.utf16(), data.size()*2, createSubKeys, status);
 }
 
 
 
 bool LRegistry::write(HKEY hKey,
-                     LPCWSTR path,
-                     LPCWSTR valueName,
-                     const DWORD type,
-                     const LPBYTE data,
-                     const DWORD size,
-                     const bool createSubKeys)
+                      LPCWSTR path,
+                      LPCWSTR valueName,
+                      const QByteArray &data,
+                      const bool createSubKeys,
+                      LSTATUS *status)
+{
+    return write(hKey, path, valueName, REG_BINARY, (const LPBYTE)data.data(), data.size(), createSubKeys, status);
+}
+
+
+
+bool LRegistry::write(HKEY hKey,
+                      LPCWSTR path,
+                      LPCWSTR valueName,
+                      const int data,
+                      const bool createSubKeys,
+                      LSTATUS *status)
+{
+    return write(hKey, path, valueName, REG_DWORD, (const LPBYTE)&data, sizeof(DWORD), createSubKeys, status);
+}
+
+
+
+bool LRegistry::write(HKEY hKey,
+                      LPCWSTR path,
+                      LPCWSTR valueName,
+                      const DWORD type,
+                      const LPBYTE data,
+                      const DWORD size,
+                      const bool createSubKeys,
+                      LSTATUS *status)
 {
     HKEY phkResult;
 
     if (createSubKeys)
         RegCreateKey(hKey, path, &phkResult);
 
-    LSTATUS status = RegOpenKeyEx(hKey, path, 0, KEY_WRITE | KEY_WOW64_64KEY, &phkResult);
+    LSTATUS _status = RegOpenKeyEx(hKey, path, 0, KEY_WRITE | KEY_WOW64_64KEY, &phkResult);
 
-    if (status == ERROR_SUCCESS) {
-        status = RegSetValueEx(phkResult,
-                               valueName,
-                               NULL,
-                               type,
-                               data,
-                               size);
+    if (_status == ERROR_SUCCESS) {
+        _status = RegSetValueEx(phkResult,
+                                valueName,
+                                NULL,
+                                type,
+                                data,
+                                size);
 
         RegCloseKey(phkResult);
     }
 
-    if (status == ERROR_SUCCESS)
-        return true;
+    if (status != nullptr)
+        *status = _status;
 
-    WARNING_LOG status;
-
-    return false;
+    return _status == ERROR_SUCCESS;
 }
 
 
 
-bool LRegistry::remove(HKEY hKey, LPCWSTR path)
+bool LRegistry::remove(HKEY hKey, LPCWSTR path, LSTATUS *status)
 {
-    const LSTATUS status = RegDeleteKey(hKey, path);
+    const LSTATUS _status = RegDeleteKey(hKey, path);
 
-    if (status == ERROR_SUCCESS)
-        return true;
+    if (status != nullptr)
+        *status = _status;
 
-    WARNING_LOG status;
-
-    return false;
+    return _status == ERROR_SUCCESS;
 }
 
 
 
-bool LRegistry::remove(HKEY hKey, LPCWSTR path, LPCWSTR valueName)
+bool LRegistry::remove(HKEY hKey, LPCWSTR path, LPCWSTR valueName, LSTATUS *status)
 {
     HKEY phkResult;
 
-    LSTATUS status = RegOpenKeyEx(hKey, path, 0, KEY_WRITE | KEY_WOW64_64KEY, &phkResult);
+    LSTATUS _status = RegOpenKeyEx(hKey, path, 0, KEY_WRITE | KEY_WOW64_64KEY, &phkResult);
 
-    if (status == ERROR_SUCCESS) {
-        status = RegDeleteValue(phkResult, valueName);
+    if (_status == ERROR_SUCCESS) {
+        _status = RegDeleteValue(phkResult, valueName);
 
         RegCloseKey(phkResult);
     }
 
-    if (status == ERROR_SUCCESS)
-        return true;
+    if (status != nullptr)
+        *status = _status;
 
-    WARNING_LOG status;
-
-    return false;
+    return _status == ERROR_SUCCESS;
 }
 
 #endif

@@ -21,25 +21,47 @@ public:
     static QStringList childGroups(const QString &path);
 
 #ifdef Q_OS_WIN
-    static QString readString(HKEY hKey, LPCWSTR valueName);
+    static QString readString(HKEY hKey, LPCWSTR valueName, LSTATUS *status = nullptr);
 
-    static QString readString(HKEY hKey, LPCWSTR path, LPCWSTR valueName);
+    static QString readString(HKEY hKey, LPCWSTR path, LPCWSTR valueName, LSTATUS *status = nullptr);
 
-    static QByteArray readByteArray(HKEY hKey, LPCWSTR path, LPCWSTR valueName);
+    static QByteArray readByteArray(HKEY hKey, LPCWSTR path, LPCWSTR valueName, LSTATUS *status = nullptr);
 
-    static int readInt(HKEY hKey, LPCWSTR path, LPCWSTR valueName);
+    static int readInt(HKEY hKey, LPCWSTR path, LPCWSTR valueName, LSTATUS *status = nullptr);
 
-    static bool write(HKEY hKey, LPCWSTR path, LPCWSTR valueName, const QString &data, bool createSubKeys = true);
+    static bool write(HKEY hKey,
+                      LPCWSTR path,
+                      LPCWSTR valueName,
+                      const QString &data,
+                      bool createSubKeys = true,
+                      LSTATUS *status = nullptr);
 
-    static bool write(HKEY hKey, LPCWSTR path, LPCWSTR valueName, const QByteArray &data, bool createSubKeys = true);
+    static bool write(HKEY hKey,
+                      LPCWSTR path,
+                      LPCWSTR valueName,
+                      const QByteArray &data,
+                      bool createSubKeys = true,
+                      LSTATUS *status = nullptr);
 
-    static bool write(HKEY hKey, LPCWSTR path, LPCWSTR valueName, int data, bool createSubKeys = true);
+    static bool write(HKEY hKey,
+                      LPCWSTR path,
+                      LPCWSTR valueName,
+                      int data,
+                      bool createSubKeys = true,
+                      LSTATUS *status = nullptr);
 
-    static bool write(HKEY hKey, LPCWSTR path, LPCWSTR valueName, DWORD type, const LPBYTE, DWORD size, bool createSubKeys = true);
+    static bool write(HKEY hKey,
+                      LPCWSTR path,
+                      LPCWSTR valueName,
+                      DWORD type,
+                      const LPBYTE,
+                      DWORD size,
+                      bool createSubKeys = true,
+                      LSTATUS *status = nullptr);
 
-    static bool remove(HKEY hKey, LPCWSTR path);
+    static bool remove(HKEY hKey, LPCWSTR path, LSTATUS *status = nullptr);
 
-    static bool remove(HKEY hKey, LPCWSTR path, LPCWSTR valueName);
+    static bool remove(HKEY hKey, LPCWSTR path, LPCWSTR valueName, LSTATUS *status = nullptr);
 #endif
 };
 
