@@ -2,7 +2,7 @@
 
 
 
-quint64 LNumberUtils::pow(int x, uint n)
+quint64 LNumberUtils::pow(qint64 x, uint n)
 {
     quint64 result = 1;
 

@@ -8,7 +8,7 @@
 class LUKQT_DECLSPEC LNumberUtils
 {
 public:
-    static quint64 pow(int x, uint n);
+    static quint64 pow(qint64 x, uint n);
 
     static int compareReals(qreal a, qreal b = 0.0, qreal epsilon = 1e-6);
 
