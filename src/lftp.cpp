@@ -74,7 +74,7 @@ void LFtp::setErrorHandlers(QNetworkReply *networkReply, const int timeout)
 
     // deprecated since 5.15.0, use QNetworkAccessManager::transferTimeout() instead
     if (timeout > 0)
-        QTimer::singleShot(timeout, [this, networkReply]() {
+        QTimer::singleShot(timeout, this, [this, networkReply]() {
             NetworkReplyPtr networkReplyPtr = getNetworkReplyPtr(networkReply, false);
             if (!networkReplyPtr.isNull()) {
                 WARNING_LOG "request timeout:" << networkReplyPtr->operation() << networkReplyPtr->url().path();
