@@ -16,21 +16,27 @@ private:
     const char* m_function;
 };
 
-#define FUNCTION_LOG LFunctionLog lFunctionLog(__FUNCTION__)
+#ifdef Q_OS_WIN
+    #define FUNCTION_NAME __FUNCTION__
+#else
+    #define FUNCTION_NAME __PRETTY_FUNCTION__
+#endif
 
-#define DEBUG_LOG qDebug().noquote() << __FUNCTION__ <<
-#define DEBUG_LOG_ qDebug().noquote() << __FUNCTION__
+#define FUNCTION_LOG LFunctionLog lFunctionLog(FUNCTION_NAME)
 
-#define INFO_LOG qInfo().noquote() << __FUNCTION__ <<
-#define INFO_LOG_ qInfo().noquote() << __FUNCTION__
+#define DEBUG_LOG qDebug().noquote() << FUNCTION_NAME <<
+#define DEBUG_LOG_ qDebug().noquote() << FUNCTION_NAME
 
-#define FUNCTION_LINE QStringLiteral("%1:%2:").arg(__FUNCTION__).arg(__LINE__)
+#define INFO_LOG qInfo().noquote() << FUNCTION_NAME <<
+#define INFO_LOG_ qInfo().noquote() << FUNCTION_NAME
+
+#define FUNCTION_LINE QStringLiteral("%1:%2:").arg(FUNCTION_NAME).arg(__LINE__)
 
 #ifdef Q_OS_WIN
-LUKQT_DECLSPEC QString lastErrorString();
-#define FUNCTION_LINE_E QStringLiteral("%1 [%2]").arg(FUNCTION_LINE).arg(lastErrorString())
+    LUKQT_DECLSPEC QString lastErrorString();
+    #define FUNCTION_LINE_E QStringLiteral("%1 [%2]").arg(FUNCTION_LINE).arg(lastErrorString())
 #else
-#define FUNCTION_LINE_E FUNCTION_LINE
+    #define FUNCTION_LINE_E FUNCTION_LINE
 #endif
 
 #define WARNING_LOG qWarning().noquote() << FUNCTION_LINE <<

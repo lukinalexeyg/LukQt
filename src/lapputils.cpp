@@ -8,9 +8,11 @@
 #include <QTimer>
 #include <QVector>
 
-#ifdef Q_OS_WIN
-#include <Windows.h>
-#include <TlHelp32.h>
+#if defined(Q_OS_WIN)
+    #include <Windows.h>
+    #include <TlHelp32.h>
+#elif defined(Q_OS_UNIX)
+    #include <fcntl.h>
 #endif
 
 
@@ -97,7 +99,7 @@ QStringList LAppUtils::argumentsList(int argc, char **argv)
     return arguments;
 }
 #else
-QStringList AppUtils::argumentsList(int argc, char **argv)
+QStringList LAppUtils::argumentsList(int argc, char **argv)
 {
     QStringList arguments;
 
@@ -176,6 +178,8 @@ bool LAppUtils::areRunning(const QStringList &processNames)
     }
 
     CloseHandle(hSnapshot);
+#else
+    Q_UNUSED(processNames)
 #endif
 
     return false;
@@ -188,6 +192,6 @@ void LAppUtils::errorBeep()
 #ifdef Q_OS_WIN
     MessageBeep(MB_ICONERROR);
 #else
-    qApp->beep();
+    open("/dev/console", O_WRONLY);
 #endif
 }

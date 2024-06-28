@@ -1,6 +1,8 @@
 #ifndef LMACROS_H
 #define LMACROS_H
 
+#include <QString>
+
 #define STR(s) #s
 
 #define QL1(s) QLatin1String(s)
