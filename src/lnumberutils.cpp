@@ -1,6 +1,8 @@
 #include "lnumberutils.h"
 
-#include <math.h>
+#ifdef Q_OS_UNIX
+    #include <math.h>
+#endif
 
 
 

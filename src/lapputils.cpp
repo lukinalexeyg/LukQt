@@ -11,8 +11,10 @@
 #if defined(Q_OS_WIN)
     #include <Windows.h>
     #include <TlHelp32.h>
-#elif defined(Q_OS_UNIX)
+#else
+    #include <dirent.h>
     #include <fcntl.h>
+    #include <fstream>
 #endif
 
 
@@ -179,7 +181,44 @@ bool LAppUtils::areRunning(const QStringList &processNames)
 
     CloseHandle(hSnapshot);
 #else
-    Q_UNUSED(processNames)
+
+    // Open the /proc directory
+    DIR *procDir = opendir("/proc");
+
+    if (procDir != NULL) {
+        // Enumerate all entries in directory until process found
+        struct dirent *dirEntity;
+
+        while ((dirEntity = readdir(procDir))) {
+            // Skip non-numeric entries
+            const int pid = atoi(dirEntity->d_name);
+
+            if (pid > 0) {
+                // Read contents of virtual /proc/{pid}/cmdline file
+                std::string cmdPath = std::string("/proc/") + dirEntity->d_name + "/cmdline";
+                std::ifstream cmdFile(cmdPath.c_str());
+                std::string cmdLine;
+                getline(cmdFile, cmdLine);
+
+                if (!cmdLine.empty()) {
+                    // Keep first cmdline item which contains the program path
+                    size_t pos = cmdLine.find('\0');
+                    if (pos != std::string::npos)
+                        cmdLine = cmdLine.substr(0, pos);
+
+                    // Keep program name only, removing the path
+                    pos = cmdLine.rfind('/');
+                    if (pos != std::string::npos)
+                        cmdLine = cmdLine.substr(pos + 1);
+
+                    // Compare against requested process name
+                    if (processNames.contains(QString::fromStdString(cmdLine)))
+                        return true;
+                }
+            }
+        }
+    }
+
 #endif
 
     return false;

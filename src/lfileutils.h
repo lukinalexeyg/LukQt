@@ -10,7 +10,9 @@
 class LUKQT_DECLSPEC LFileUtils
 {
 public:
-    static QString concatPathes(const QString &path1, const QString &path2, const QString &path3 = QString());
+    static QString concatPathes(const QString &path1, const QString &path2);
+
+    static QString concatPathes(const QString &path1, const QString &path2, const QString &path3);
 
     static QString concatFileName(const QString &name, const QString &extension);
 

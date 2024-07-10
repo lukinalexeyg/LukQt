@@ -9,7 +9,7 @@ static const QString s_falseString("false");
 
 
 
-QString LStringUtils::fromLocal8Bit(const char *string, const Mib mib, int size)
+QString LStringUtils::fromLocal8Bit(const char *string, const Mib mib, const int size)
 {
     QTextCodec *textCodec = QTextCodec::codecForMib(mib);
     if (textCodec == nullptr)

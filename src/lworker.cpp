@@ -2,10 +2,10 @@
 
 
 
-LWorker::LWorker(QObject *parent)
-    : m_parent{parent},
-      m_thread{nullptr},
-      m_autoDelete(false)
+LWorker::LWorker(QObject *parent) :
+    m_parent{parent},
+    m_thread{nullptr},
+    m_autoDelete(false)
 {
 }
 
@@ -50,6 +50,8 @@ void LWorker::stopThread()
 
     m_thread->quit();
     m_thread->wait();
+
+    emit threadStopped();
 }
 
 

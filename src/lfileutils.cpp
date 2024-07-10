@@ -10,11 +10,15 @@
 
 
 
+QString LFileUtils::concatPathes(const QString &path1, const QString &path2)
+{
+    return LStringUtils::concatStrings(path1, LChars::slash, path2);
+}
+
+
+
 QString LFileUtils::concatPathes(const QString &path1, const QString &path2, const QString &path3)
 {
-    if (path3.isEmpty())
-        return LStringUtils::concatStrings(path1, LChars::slash, path2);
-
     return LStringUtils::concatStrings(path1, LChars::slash, path2, LChars::slash, path3);
 }
 
@@ -71,11 +75,15 @@ QByteArray LFileUtils::readFile(const QString &filePath,
         data = file.readAll();
 
     else {
-        QTextStream textStream(&file);
         qint64 l = 0;
 
-        while (!textStream.atEnd() && l < maxLinesCount) {
-            data += textStream.readLine(maxLineLength) + LChars::Control::LF;
+        while (!file.atEnd() && l < maxLinesCount) {
+            QByteArray line = file.readLine(maxLineLength);
+
+            if (!line.endsWith(QBL("\n")))
+                line.append(QBL("\n"));
+
+            data += line;
             ++l;
         }
     }

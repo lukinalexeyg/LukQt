@@ -28,6 +28,8 @@ public:
 signals:
     void threadStarted();
 
+    void threadStopped();
+
     void threadFinished();
 
     void threadTerminated();
