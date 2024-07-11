@@ -180,6 +180,7 @@ bool LAppUtils::areRunning(const QStringList &processNames)
     }
 
     CloseHandle(hSnapshot);
+
 #else
 
     // Open the /proc directory

@@ -1,9 +1,9 @@
 #include "lftp.h"
 
-#include "lfileutils.h"
 #include "lftp.h"
 #include "llog.h"
 #include "lmacros.h"
+#include "lpath.h"
 
 #include <QTimer>
 
@@ -57,7 +57,7 @@ QNetworkRequest LFtp::networkRequest(const QString &path) const
 {
     QUrl url;
 
-    const QString urlString = m_origin.isEmpty() ? path : LFileUtils::concatPathes(m_origin, path);
+    const QString urlString = m_origin.isEmpty() ? path : LPath::combine(m_origin, path);
 
     url.setUrl(urlString);
     url.setUserName(m_userName);

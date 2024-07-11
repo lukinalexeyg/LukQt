@@ -11,6 +11,7 @@ HEADERS += \
     $$PWD/lmacros.h \
     $$PWD/lnetworkutils.h \
     $$PWD/lnumberutils.h \
+    $$PWD/lpath.h \
     $$PWD/lregistry.h \
     $$PWD/lsettings.h \
     $$PWD/lstringutils.h \
@@ -26,6 +27,7 @@ SOURCES += \
     $$PWD/llog.cpp \
     $$PWD/lnetworkutils.cpp \
     $$PWD/lnumberutils.cpp \
+    $$PWD/lpath.cpp \
     $$PWD/lregistry.cpp \
     $$PWD/lsettings.cpp \
     $$PWD/lstringutils.cpp \

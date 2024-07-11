@@ -2,76 +2,25 @@
 
 #include "llog.h"
 #include "lmacros.h"
-#include "lstringutils.h"
+#include "lpath.h"
 
-#include <QCoreApplication>
 #include <QDir>
 #include <QRegularExpression>
 
 
 
-QString LFileUtils::concatPathes(const QString &path1, const QString &path2)
-{
-    return LStringUtils::concatStrings(path1, LChars::slash, path2);
-}
-
-
-
-QString LFileUtils::concatPathes(const QString &path1, const QString &path2, const QString &path3)
-{
-    return LStringUtils::concatStrings(path1, LChars::slash, path2, LChars::slash, path3);
-}
-
-
-
-QString LFileUtils::concatFileName(const QString &name, const QString &extension)
-{
-    return LStringUtils::concatStrings(name, LChars::dot, extension);
-}
-
-
-
-QString LFileUtils::appendFileNameToPath(const QString &path, const QString &fileName, const QString &fileExtension)
-{
-    return LStringUtils::concatStrings(path, LChars::slash, fileName, LChars::dot, fileExtension);
-}
-
-
-
-QString LFileUtils::upAppDirPath()
-{
-    return qApp->applicationDirPath().section(LChars::slash, 0, -2);
-}
-
-
-
-void LFileUtils::fixPath(QString &path, const QChar &replacedChar)
-{
-#ifdef Q_OS_WIN
-    const QString chars("<>:\"/\\|?*");
-#else
-    const QString chars("/");
-#endif
-
-    std::replace_if(path.begin(), path.end(), [&chars](const QChar &c) {
-        return chars.contains(c);
-    }, replacedChar);
-}
-
-
-
-QByteArray LFileUtils::readFile(const QString &filePath,
-                                const qint64 maxLinesCount,
-                                const qint64 maxLineLength)
+QByteArray LFileUtils::readTextFile(const QString &filePath,
+                                    const qint64 maxLinesCount,
+                                    const qint64 maxLineLength)
 {
     QFile file(filePath);
 
-    if (!file.open(QFile::ReadOnly))
+    if (!file.open(QFile::ReadOnly | QFile::Text))
         return QByteArray();
 
     QByteArray data;
 
-    if (maxLinesCount <= 0)
+    if (maxLinesCount <= 0 && maxLineLength <= 0)
         data = file.readAll();
 
     else {
@@ -187,7 +136,11 @@ bool LFileUtils::copyDir(const QString &sourcePath, const QString &destinationPa
                          const QStringList &nameFilters, const QStringList &exceptNameFilters,
                          const bool overwrite)
 {
-    return copyDir(sourcePath, destinationPath, nameFilters, wildcardsToRegularExpressions(exceptNameFilters), overwrite);
+    return copyDir(sourcePath,
+                   destinationPath,
+                   nameFilters,
+                   wildcardsToRegularExpressions(exceptNameFilters),
+                   overwrite);
 }
 
 
@@ -211,10 +164,10 @@ bool LFileUtils::copyDir(const QString &sourcePath,
         if (hasMatchToRegularExpressions(exceptNameFilterRegularExpressions, d))
             continue;
 
-        const QString newPath = concatPathes(destinationPath, d);
+        const QString newPath = LPath::combine(destinationPath, d);
 
         if (dir.mkpath(newPath)) {
-            if (!copyDir(concatPathes(sourcePath, d),
+            if (!copyDir(LPath::combine(sourcePath, d),
                          newPath,
                          nameFilters,
                          exceptNameFilterRegularExpressions,
@@ -231,13 +184,13 @@ bool LFileUtils::copyDir(const QString &sourcePath,
         if (hasMatchToRegularExpressions(exceptNameFilterRegularExpressions, f))
             continue;
 
-        const QString newPath = concatPathes(destinationPath, f);
+        const QString newPath = LPath::combine(destinationPath, f);
 
         if (overwrite && QFile::exists(newPath) && !QFile::remove(newPath)) {
             ok = false;
             WARNING_LOG_E "remove old file error:" << newPath;
         }
-        if (!QFile::copy(concatPathes(sourcePath, f), newPath))
+        if (!QFile::copy(LPath::combine(sourcePath, f), newPath))
             ok = false;
     }
 

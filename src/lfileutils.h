@@ -1,7 +1,6 @@
 #ifndef LFILEUTILS_H
 #define LFILEUTILS_H
 
-#include "lchars.h"
 #include "lukqtglobal.h"
 
 #include <QDateTime>
@@ -10,21 +9,9 @@
 class LUKQT_DECLSPEC LFileUtils
 {
 public:
-    static QString concatPathes(const QString &path1, const QString &path2);
-
-    static QString concatPathes(const QString &path1, const QString &path2, const QString &path3);
-
-    static QString concatFileName(const QString &name, const QString &extension);
-
-    static QString appendFileNameToPath(const QString &path, const QString &fileName, const QString &fileExtension);
-
-    static QString upAppDirPath();
-
-    static void fixPath(QString &path, const QChar &replacedChar = LChars::underscore);
-
-    static QByteArray readFile(const QString &filePath,
-                               qint64 maxLinesCount = 0,
-                               qint64 maxLineLength = 256);
+    static QByteArray readTextFile(const QString &filePath,
+                                   qint64 maxLinesCount = 0,
+                                   qint64 maxLineLength = 0);
 
     static bool makeEmptyDir(const QString &path);
 

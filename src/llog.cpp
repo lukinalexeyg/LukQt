@@ -5,6 +5,8 @@
     #include <comdef.h>
 #endif
 
+
+
 QString lastErrorString()
 {
 #ifdef Q_OS_WIN

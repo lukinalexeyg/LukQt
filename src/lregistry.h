@@ -4,7 +4,7 @@
 #include <QVariant>
 
 #ifdef Q_OS_WIN
-#include <Windows.h>
+    #include <Windows.h>
 #endif
 
 class LRegistry

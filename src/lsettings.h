@@ -28,8 +28,6 @@ public:
 
     explicit LSettings(QObject *parent = nullptr);
 
-
-
 public:
     /*!
     Initialize setting.
@@ -46,16 +44,12 @@ public:
         setValue(name, v);
     }
 
-
-
     /*!
     Initialize bool setting.
     \param name name of the setting
     \param value value of the setting
     */
     void initBoolValue(const QString &name, bool &v);
-
-
 
     /*!
     Initialize number setting.
@@ -77,7 +71,7 @@ public:
                               const QString &name,
                               const QString &value,
                               qint64 maxLinesCount = 65536,
-                              qint64 maxLineLength = 65536);
+                              qint64 maxLineLength = 256);
 };
 
 #endif // LSETTINGS_H
