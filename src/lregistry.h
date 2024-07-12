@@ -1,13 +1,15 @@
 #ifndef LREGISTRY_H
 #define LREGISTRY_H
 
+#include "lukqtglobal.h"
+
 #include <QVariant>
 
 #ifdef Q_OS_WIN
     #include <Windows.h>
 #endif
 
-class LRegistry
+class LUKQT_DECLSPEC LRegistry
 {
 public:
     static QVariant get(const QString &key, const QVariant &def = QVariant());

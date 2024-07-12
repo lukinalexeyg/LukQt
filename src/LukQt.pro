@@ -10,18 +10,16 @@ CONFIG += skip_target_version_ext
 
 DEFINES += LUKQT_EXPORT
 
+# Windows and Unix get the suffix "d" to indicate a debug version of the library.
+# Mac OS gets the suffix "_debug".
+CONFIG(debug, debug|release) {
+    win32:      TARGET = $$join(TARGET,,,d)
+    mac:        TARGET = $$join(TARGET,,,_debug)
+    unix:!mac:  TARGET = $$join(TARGET,,,d)
+}
+
 include(LukQt.pri)
 
 DESTDIR = bin
 MOC_DIR = moc
 OBJECTS_DIR = obj
-
-win32-msvc* {
-    QMAKE_EXTRA_TARGETS += before_build makefilehook
-    makefilehook.target = $(MAKEFILE)
-    makefilehook.depends = .beforebuild
-    PRE_TARGETDEPS += .beforebuild
-    before_build.target = .beforebuild
-    before_build.depends = FORCE
-    before_build.commands = chcp 1251
-}

@@ -2,8 +2,9 @@
 #define LPATH_H
 
 #include "lchars.h"
+#include "lukqtglobal.h"
 
-class LPath
+class LUKQT_DECLSPEC LPath
 {
 public:
     static QString combine(const QString &path1, const QString &path2);
