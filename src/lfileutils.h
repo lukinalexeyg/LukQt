@@ -1,6 +1,7 @@
 #ifndef LFILEUTILS_H
 #define LFILEUTILS_H
 
+#include "lchars.h"
 #include "lukqtglobal.h"
 
 #include <QDateTime>
@@ -9,6 +10,8 @@
 class LUKQT_DECLSPEC LFileUtils
 {
 public:
+    static void fixFileName(QString &path, const QChar &replacedChar = LChars::underscore);
+
     static QByteArray readTextFile(const QString &filePath,
                                    qint64 maxLinesCount = 0,
                                    qint64 maxLineLength = 0);

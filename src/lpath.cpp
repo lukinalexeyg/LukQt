@@ -36,18 +36,3 @@ QString LPath::upDirPath(const QString &path)
 {
     return path.section(LChars::slash, 0, -2);
 }
-
-
-
-void LPath::fix(QString &path, const QChar &replacedChar)
-{
-#ifdef Q_OS_WIN
-    const QString chars("<>:\"/\\|?*");
-#else
-    const QString chars("/");
-#endif
-
-    std::replace_if(path.begin(), path.end(), [&chars](const QChar &c) {
-        return chars.contains(c);
-    }, replacedChar);
-}

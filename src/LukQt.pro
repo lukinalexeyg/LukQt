@@ -1,6 +1,6 @@
 TEMPLATE = lib
 
-QT += core network
+QT += core
 
 TARGET = LukQt
 

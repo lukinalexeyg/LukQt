@@ -61,8 +61,8 @@ void LSettings::initBoolValue(const QString &name, bool &v)
 
 
 bool LSettings::setIniSetting(const QString &filePath,
-                              const QString &name,
-                              const QString &value,
+                              const QByteArray &name,
+                              const QByteArray &value,
                               const qint64 maxLinesCount,
                               const qint64 maxLineLength)
 {
@@ -78,9 +78,9 @@ bool LSettings::setIniSetting(const QString &filePath,
     while (!file.atEnd() && l < maxLinesCount) {
         QByteArray line = file.readLine(maxLineLength);
 
-        if (pos == 0 && line.startsWith(name.toUtf8()) && line.contains(QBL("="))) {
+        if (pos == 0 && line.startsWith(name) && line.contains('=')) {
             pos = file.pos() - line.length() - 1;
-            line = QSL("%1 = %2\n").arg(name, value).toUtf8();
+            line = name + " = " + value + '\n';
         }
 
         if (pos > 0)

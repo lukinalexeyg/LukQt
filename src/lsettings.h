@@ -68,8 +68,8 @@ public:
     }
 
     static bool setIniSetting(const QString &filePath,
-                              const QString &name,
-                              const QString &value,
+                              const QByteArray &name,
+                              const QByteArray &value,
                               qint64 maxLinesCount = 65536,
                               qint64 maxLineLength = 256);
 };

@@ -323,8 +323,8 @@ QStringList LStringUtils::wordWrapString(const QString &string,
 
     foreach_element_const_ref (s, list1) {
         if (wordsCount == 0) {
-                list2 << s;
-                ++wordsCount;
+            list2 << s;
+            ++wordsCount;
         }
 
         else {

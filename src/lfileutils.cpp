@@ -9,6 +9,21 @@
 
 
 
+void LFileUtils::fixFileName(QString &name, const QChar &replacedChar)
+{
+#ifdef Q_OS_WIN
+    const QString chars("<>:\"/\\|?*");
+#else
+    const QString chars("/");
+#endif
+
+    std::replace_if(name.begin(), name.end(), [&chars](const QChar &c) {
+        return chars.contains(c);
+    }, replacedChar);
+}
+
+
+
 QByteArray LFileUtils::readTextFile(const QString &filePath,
                                     const qint64 maxLinesCount,
                                     const qint64 maxLineLength)
@@ -29,8 +44,8 @@ QByteArray LFileUtils::readTextFile(const QString &filePath,
         while (!file.atEnd() && l < maxLinesCount) {
             QByteArray line = file.readLine(maxLineLength);
 
-            if (!line.endsWith(QBL("\n")))
-                line.append(QBL("\n"));
+            if (!line.endsWith('n'))
+                line.append('\n');
 
             data += line;
             ++l;

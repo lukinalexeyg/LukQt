@@ -1,7 +1,6 @@
 #ifndef LPATH_H
 #define LPATH_H
 
-#include "lchars.h"
 #include "lukqtglobal.h"
 
 class LUKQT_DECLSPEC LPath
@@ -16,8 +15,6 @@ public:
     static QString combineExt(const QString &path1, const QString &path2, const QString &extension);
 
     static QString upDirPath(const QString &path);
-
-    static void fix(QString &path, const QChar &replacedChar = LChars::underscore);
 };
 
 #endif // LPATH_H
