@@ -44,7 +44,7 @@ QByteArray LFileUtils::readTextFile(const QString &filePath,
         while (!file.atEnd() && l < maxLinesCount) {
             QByteArray line = file.readLine(maxLineLength);
 
-            if (!line.endsWith('n'))
+            if (!line.endsWith('\n'))
                 line.append('\n');
 
             data += line;
