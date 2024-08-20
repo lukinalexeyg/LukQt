@@ -10,12 +10,15 @@
 
 #if defined(Q_OS_WIN)
     #include <Windows.h>
+    #include <comdef.h>
     #include <TlHelp32.h>
 #else
     #include <dirent.h>
     #include <fcntl.h>
     #include <fstream>
 #endif
+
+ulong LAppUtils::s_lastError = 0;
 
 
 
@@ -114,12 +117,16 @@ QStringList LAppUtils::argumentsList(int argc, char **argv)
 
 
 
-QDateTime LAppUtils::buildDateTime()
+QDate LAppUtils::buildDate()
 {
-    const QDate date = QLocale(QLocale::C).toDate(QString(__DATE__).simplified(), QSL("MMM d yyyy"));
-    const QTime time = QLocale(QLocale::C).toTime(QString(__TIME__).simplified(), QSL("hh:mm:ss"));
+    return QLocale(QLocale::C).toDate(QString(__DATE__).simplified(), QSL("MMM d yyyy"));
+}
 
-    return QDateTime(date, time);
+
+
+QTime LAppUtils::buildTime()
+{
+    return QLocale(QLocale::C).toTime(QString(__TIME__).simplified(), QSL("hh:mm:ss"));
 }
 
 
@@ -223,6 +230,32 @@ bool LAppUtils::areRunning(const QStringList &processNames)
 #endif
 
     return false;
+}
+
+
+
+void LAppUtils::setLastError()
+{
+#ifdef Q_OS_WIN
+    s_lastError = GetLastError();
+#else
+    s_lastError = errno;
+#endif
+}
+
+
+
+QString LAppUtils::lastErrorString()
+{
+    if (s_lastError == 0)
+        return QString();
+
+#ifdef Q_OS_WIN
+    const _com_error comError(s_lastError);
+    return QString::fromWCharArray(comError.ErrorMessage());
+#else
+    return QString::fromStdString(std::system_category().message(s_lastError));
+#endif
 }
 
 

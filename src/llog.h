@@ -1,7 +1,8 @@
 #ifndef LLOG_H
 #define LLOG_H
 
-#include "lukqtglobal.h"
+#include "lapputils.h"
+#include "lmacros.h"
 
 #include <QDebug>
 
@@ -24,32 +25,28 @@ private:
 
 #define FUNCTION_LOG LFunctionLog lFunctionLog(FUNCTION_NAME)
 
-#define DEBUG_LOG qDebug().noquote() << FUNCTION_NAME <<
 #define DEBUG_LOG_ qDebug().noquote() << FUNCTION_NAME
+#define DEBUG_LOG DEBUG_LOG_ <<
 
-#define INFO_LOG qInfo().noquote() << FUNCTION_NAME <<
 #define INFO_LOG_ qInfo().noquote() << FUNCTION_NAME
+#define INFO_LOG INFO_LOG_ <<
 
-#define FUNCTION_LINE QStringLiteral("%1:%2:").arg(FUNCTION_NAME).arg(__LINE__)
+#define FUNCTION_NAME_AND_LINE QSL("%1:%2").arg(FUNCTION_NAME).arg(__LINE__)
 
-#ifdef Q_OS_WIN
-    LUKQT_DECLSPEC QString lastErrorString();
-    #define FUNCTION_LINE_E QStringLiteral("%1 [%2]").arg(FUNCTION_LINE).arg(lastErrorString())
-#else
-    #define FUNCTION_LINE_E FUNCTION_LINE
-#endif
+#define WARNING_LOG_ qWarning().noquote() << FUNCTION_NAME_AND_LINE
+#define WARNING_LOG WARNING_LOG_ <<
 
-#define WARNING_LOG qWarning().noquote() << FUNCTION_LINE <<
-#define WARNING_LOG_ qWarning().noquote() << FUNCTION_LINE
-#define WARNING_LOG_E qWarning().noquote() << FUNCTION_LINE_E <<
-#define WARNING_LOG_E_ qWarning().noquote() << FUNCTION_LINE_E
+#define WARNING_LOG_E_ \
+    LAppUtils::setLastError(); \
+    qWarning().noquote() \
+        << FUNCTION_NAME_AND_LINE \
+        << QSL("(%1:%2)").arg(LAppUtils::lastError()).arg(LAppUtils::lastErrorString())
 
-#define CRITICAL_LOG qCritical().noquote() << FUNCTION_LINE <<
-#define CRITICAL_LOG_E qCritical().noquote() << FUNCTION_LINE_E <<
+#define WARNING_LOG_E WARNING_LOG_E_ <<
 
-#define FATAL_LOG qFatal().noquote() << FUNCTION_LINE <<
-#define FATAL_LOG_E qFatal().noquote() << FUNCTION_LINE_E <<
+#define CRITICAL_LOG_ qCritical().noquote() << FUNCTION_NAME_AND_LINE
+#define CRITICAL_LOG CRITICAL_LOG_ <<
 
-#define DUMP(x) " {" << #x << ":" << x << "} "
+#define DUMP(x) " {" << STR(x) << ":" << x << "} "
 
 #endif // LLOG_H

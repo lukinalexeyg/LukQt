@@ -10,9 +10,16 @@ public:
 
     static QString combine(const QString &path1, const QString &path2, const QString &path3);
 
+    static QString combine(const QString &path1, const QString &path2, const QString &path3, const QString &path4);
+
     static QString combineExt(const QString &path, const QString &extension);
 
     static QString combineExt(const QString &path1, const QString &path2, const QString &extension);
+
+    static QString combineExt(const QString &path1,
+                              const QString &path2,
+                              const QString &path3,
+                              const QString &extension);
 
     static QString upDirPath(const QString &path);
 };

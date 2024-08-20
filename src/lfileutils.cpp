@@ -202,8 +202,8 @@ bool LFileUtils::copyDir(const QString &sourcePath,
         const QString newPath = LPath::combine(destinationPath, f);
 
         if (overwrite && QFile::exists(newPath) && !QFile::remove(newPath)) {
-            ok = false;
             WARNING_LOG_E "remove old file error:" << newPath;
+            ok = false;
         }
         if (!QFile::copy(LPath::combine(sourcePath, f), newPath))
             ok = false;

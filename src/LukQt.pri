@@ -18,7 +18,6 @@ SOURCES += \
     $$PWD/lapputils.cpp \
     $$PWD/lcrashhandler.cpp \
     $$PWD/lfileutils.cpp \
-    $$PWD/llog.cpp \
     $$PWD/lnumberutils.cpp \
     $$PWD/lpath.cpp \
     $$PWD/lsettings.cpp \

@@ -2,6 +2,7 @@
 
 #include "lmacros.h"
 
+#include <QDateTime>
 #include <QTextCodec>
 
 static const QString s_trueString("true");
@@ -32,92 +33,218 @@ QString LStringUtils::fromBool(const bool value)
 
 
 
-QString LStringUtils::fromVariant(const QVariant &value)
+QString LStringUtils::fromVariant(const QVariant &value,
+                                  const bool typeNameEnabled,
+                                  const bool autoFormattingEnabled,
+                                  const bool spacesEnabled,
+                                  const QString &tabString)
+{
+    return _fromVariant(value, typeNameEnabled, autoFormattingEnabled, spacesEnabled, tabString, 1);
+}
+
+
+
+QString LStringUtils::_fromVariant(const QVariant &value,
+                                   const bool typeNameEnabled,
+                                   const bool autoFormattingEnabled,
+                                   const bool spacesEnabled,
+                                   const QString &tabString,
+                                   const int deep)
 {
     QString string;
 
+    if (typeNameEnabled) {
+        string += value.typeName();
+        string += LChars::parenthesisLeft;
+    }
+
     switch (value.type()) {
         case QVariant::Type::String: {
-            string = value.toString();
+            string += value.toString();
+            break;
+        }
+
+        case QVariant::Type::Char: {
+            string += value.toChar();
             break;
         }
 
         case QVariant::Type::ByteArray: {
-            string = QString(value.toByteArray());
+            string += QString(value.toByteArray());
             break;
         }
 
         case QVariant::Type::Int: {
             const int i = value.toInt();
-            string = QString::number(i);
+            string += QString::number(i);
             break;
         }
 
         case QVariant::Type::UInt: {
             const uint i = value.toUInt();
-            string = QString::number(i);
+            string += QString::number(i);
             break;
         }
 
         case QVariant::Type::LongLong: {
             const qint64 i = value.toLongLong();
-            string = QString::number(i);
+            string += QString::number(i);
             break;
         }
 
         case QVariant::Type::ULongLong: {
             const quint64 i = value.toULongLong();
-            string = QString::number(i);
+            string += QString::number(i);
+            break;
+        }
+
+        case QVariant::Type::Double: {
+            string += QString::number(value.toDouble());
             break;
         }
 
         case QVariant::Type::Bool: {
-            string = fromBool(value.toBool());
+            string += fromBool(value.toBool());
+            break;
+        }
+
+        case QVariant::Type::Date: {
+            string += value.toDate().toString(Qt::ISODate);
+            break;
+        }
+
+        case QVariant::Type::Time: {
+            string += value.toTime().toString(Qt::ISODate);
+            break;
+        }
+
+        case QVariant::Type::DateTime: {
+            string += value.toDateTime().toString(Qt::ISODate);
             break;
         }
 
         case QVariant::Type::StringList: {
-            string = QSL("[ %1 ]").arg(value.toStringList().join(LChars::comma));
+            const QStringList list = value.toStringList();
+            if (!typeNameEnabled)
+                string += LChars::bracketLeft;
+            string += listToString(list, autoFormattingEnabled, spacesEnabled, tabString, deep);
+            if (!typeNameEnabled)
+                string += LChars::bracketRight;
             break;
         }
 
         case QVariant::Type::List: {
             const QVariantList list = value.toList();
-            string = LChars::bracketLeft;
-            string += LChars::space;
-            foreach_index_inc (i, list.size()) {
-                string += fromVariant(list.at(i));
-                if (i < list.size()-1) {
-                    string += LChars::comma;
-                    string += LChars::space;
-                }
-            }
-            string += LChars::space;
-            string += LChars::bracketRight;
+            QStringList stringList;
+            foreach_index_inc (i, list.size())
+                stringList << _fromVariant(list.at(i),
+                                typeNameEnabled,
+                                autoFormattingEnabled,
+                                spacesEnabled,
+                                tabString,
+                                deep + 1);
+            if (!typeNameEnabled)
+                string += LChars::bracketLeft;
+            string += listToString(stringList, autoFormattingEnabled, spacesEnabled, tabString, deep);
+            if (!typeNameEnabled)
+                string += LChars::bracketRight;
             break;
         }
 
         case QVariant::Type::Map: {
             const QVariantMap map = value.toMap();
-            string = LChars::braceLeft;
-            string += LChars::space;
-            int i = 0;
-            foreach_iterator_const_inc (it, map) {
-                string += QSL("{ %1: %2 }").arg(it.key(), fromVariant(it.value()));
-                if (i < map.size()-1) {
-                    string += LChars::comma;
-                    string += LChars::space;
-                }
-                ++i;
-            }
-            string += LChars::space;
-            string += LChars::braceRight;
+            string += mapToString(map, typeNameEnabled, autoFormattingEnabled, spacesEnabled, tabString, deep);
+            break;
+        }
+
+        case QVariant::Type::Hash: {
+            const QVariantHash hash = value.toHash();
+            string += mapToString(hash, typeNameEnabled, autoFormattingEnabled, spacesEnabled, tabString, deep);
             break;
         }
 
         default:
             break;
+    }
+
+    if (typeNameEnabled)
+        string += LChars::parenthesisRight;
+
+    return string;
+}
+
+
+
+template<typename T>
+QString LStringUtils::mapToString(const T &map,
+                                  const bool typeNameEnabled,
+                                  const bool autoFormattingEnabled,
+                                  const bool spacesEnabled,
+                                  const QString &tabString,
+                                  const int deep)
+{
+    QString string;
+    QStringList stringList;
+
+    foreach_iterator_const_inc (it, map) {
+        QString s = it.key();
+        s += LChars::colon;
+        if (spacesEnabled)
+            s += LChars::space;
+        s += _fromVariant(it.value(),
+                          typeNameEnabled,
+                          autoFormattingEnabled,
+                          spacesEnabled,
+                          tabString,
+                          deep + 1);
+        stringList << s;
+    }
+
+    if (!typeNameEnabled)
+        string += LChars::braceLeft;
+
+    string += listToString(stringList, autoFormattingEnabled, spacesEnabled, tabString, deep);
+
+    if (!typeNameEnabled)
+        string += LChars::braceRight;
+
+    return string;
+}
+
+
+
+QString LStringUtils::listToString(const QStringList &list,
+                                   const bool autoFormattingEnabled,
+                                   const bool spacesEnabled,
+                                   const QString &tabString,
+                                   const int deep)
+{
+    QString string;
+
+    if (autoFormattingEnabled)
+        string += LChars::Control::LF;
+
+    foreach_index_inc (i, list.size()) {
+        if (autoFormattingEnabled)
+            foreach_index_inc (t, deep)
+                string += tabString;
+
+        string += list.at(i);
+
+        if (i < list.size()-1) {
+            string += LChars::comma;
+            if (autoFormattingEnabled)
+                string += LChars::Control::LF;
+            else if (spacesEnabled)
+               string += LChars::space;
         }
+    }
+
+    if (autoFormattingEnabled) {
+        string += LChars::Control::LF;
+        foreach_index_inc (t, deep - 1)
+            string += tabString;
+    }
 
     return string;
 }
@@ -206,6 +333,27 @@ QString LStringUtils::concatStrings(const QString &string1,
 
 
 
+QString LStringUtils::concatStrings(const QString &string1,
+                                    const QChar &c1,
+                                    const QString &string2,
+                                    const QChar &c2,
+                                    const QString &string3,
+                                    const QChar &c3,
+                                    const QString &string4)
+{
+    QString result = string1;
+    result.reserve(string1.size() + string2.size() + string3.size() + string4.size() + 3);
+    result += c1;
+    result += string2;
+    result += c2;
+    result += string3;
+    result += c3;
+    result += string4;
+    return result;
+}
+
+
+
 QString LStringUtils::tagString(const QString &source, const QString &tag)
 {
     return betweenString(source, QSL("<%1>").arg(tag), QSL("</%1>").arg(tag));
@@ -273,7 +421,7 @@ QString LStringUtils::chopString(const QString &string, const QString &fromWhat)
 
 
 QString LStringUtils::wordWrapText(const QString &string,
-                                   const int length,
+                                   const int width,
                                    const JustifyOrientation justifyOrientation,
                                    const WordWrapPolicy wordWrapPolicy)
 {
@@ -281,7 +429,7 @@ QString LStringUtils::wordWrapText(const QString &string,
     QStringList resultStringList;
 
     foreach_element_const_ref (list0, stringList) {
-        const QStringList list1 = wordWrapString(list0, length, justifyOrientation, wordWrapPolicy);
+        const QStringList list1 = wordWrapString(list0, width, justifyOrientation, wordWrapPolicy);
         if (!list1.isEmpty())
             resultStringList << list1;
         else
@@ -294,7 +442,7 @@ QString LStringUtils::wordWrapText(const QString &string,
 
 
 QStringList LStringUtils::wordWrapString(const QString &string,
-                                         const int length,
+                                         const int width,
                                          const JustifyOrientation justifyOrientation,
                                          const WordWrapPolicy wordWrapPolicy)
 {
@@ -330,7 +478,7 @@ QStringList LStringUtils::wordWrapString(const QString &string,
         else {
             const int l = list2.at(line).length() + s.length() + 1;
 
-            if (l <= length) {
+            if (l <= width) {
                 list2[line] += QSL(" %1").arg(s);
                 ++wordsCount;
             }
@@ -343,7 +491,7 @@ QStringList LStringUtils::wordWrapString(const QString &string,
     }
 
     foreach_index_inc (i, list2.count())
-        list2[i] = fixString(list2.at(i), length, justifyOrientation);
+        list2[i] = fixString(list2.at(i), width, justifyOrientation);
 
     return list2;
 }

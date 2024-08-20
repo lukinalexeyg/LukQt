@@ -11,7 +11,9 @@ class LUKQT_DECLSPEC LAppUtils
 public:
     static QStringList argumentsList(int argc, char **argv);
 
-    static QDateTime buildDateTime();
+    static QDate buildDate();
+
+    static QTime buildTime();
 
     static void exit(int returnCode = 0, int delay = 0);
 
@@ -19,7 +21,16 @@ public:
 
     static bool areRunning(const QStringList &processNames);
 
+    static void setLastError();
+
+    static ulong lastError() { return s_lastError; }
+
+    static QString lastErrorString();
+
     static void errorBeep();
+
+private:
+    static ulong s_lastError;
 };
 
 #endif // LAPPUTILS_H

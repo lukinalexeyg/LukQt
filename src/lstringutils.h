@@ -280,25 +280,29 @@ public:
     };
 
     enum WordWrapPolicy {
-        DisabledAfterDigits,
-        EnabledAfterAllChars
+        EnabledAfterAllChars,
+        DisabledAfterDigits
     };
 
 public:
     static QString fromLocal8Bit(const char *string, Mib mib, int size = -1);
 
     template<typename T>
-    static QString fromNumber(const T number,
-                              const int length,
-                              const int base = 10,
-                              const QChar &fill = LChars::Number::zero)
+    static QString fromIntNumber(const T number,
+                                 const int length = -1,
+                                 const int base = 10,
+                                 const QChar &fill = LChars::Number::zero)
     {
         return QString::number(number, base).rightJustified(length, fill);
     }
 
     static QString fromBool(bool value);
 
-    static QString fromVariant(const QVariant &value);
+    static QString fromVariant(const QVariant &value,
+                               bool typeNameEnabled = true,
+                               bool autoFormattingEnabled = false,
+                               bool spacesEnabled = true,
+                               const QString &tabString = QString("    "));
 
     static wchar_t* toWCharArray(const QString &string);
 
@@ -316,6 +320,14 @@ public:
                                  const QChar &c2,
                                  const QString &string3);
 
+    static QString concatStrings(const QString &string1,
+                                 const QChar &c1,
+                                 const QString &string2,
+                                 const QChar &c2,
+                                 const QString &string3,
+                                 const QChar &c3,
+                                 const QString &string4);
+
     static QString tagString(const QString &source, const QString &tag);
 
     static QString attributeString(const QString &source, const QString &attribute);
@@ -327,18 +339,40 @@ public:
     static QString chopString(const QString &string, const QString &fromWhat);
 
     static QString wordWrapText(const QString &string,
-                                const int length,
+                                const int width,
                                 const JustifyOrientation justifyOrientation = JustifyOrientation::Left,
-                                const WordWrapPolicy wordWrapPolicy = WordWrapPolicy::DisabledAfterDigits);
+                                const WordWrapPolicy wordWrapPolicy = WordWrapPolicy::EnabledAfterAllChars);
 
     static QStringList wordWrapString(const QString &string,
-                                      const int length,
+                                      const int width,
                                       const JustifyOrientation justifyOrientation = JustifyOrientation::Left,
-                                      const WordWrapPolicy wordWrapPolicy = WordWrapPolicy::DisabledAfterDigits);
+                                      const WordWrapPolicy wordWrapPolicy = WordWrapPolicy::EnabledAfterAllChars);
 
     static QString fixString(const QString &string,
                              const int length,
-                             const JustifyOrientation justifyOrientation = JustifyOrientation::Left);    
+                             const JustifyOrientation justifyOrientation = JustifyOrientation::Left);
+
+private:
+    static QString _fromVariant(const QVariant &value,
+                                bool typeNameEnabled,
+                                bool autoFormattingEnabled,
+                                bool spacesEnabled,
+                                const QString &tabString,
+                                int deep);
+
+    template<typename T>
+    static QString mapToString(const T &map,
+                               bool typeNameEnabled,
+                               bool autoFormattingEnabled,
+                               bool spacesEnabled,
+                               const QString &tabString,
+                               int deep);
+
+    static QString listToString(const QStringList &list,
+                                bool autoFormattingEnabled,
+                                bool spacesEnabled,
+                                const QString &tabString,
+                                int deep);
 };
 
 #endif // LSTRINGUTILS_H
