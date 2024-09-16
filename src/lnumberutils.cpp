@@ -1,5 +1,9 @@
 #include "lnumberutils.h"
 
+#ifdef Q_OS_UNIX
+    #include <math.h>
+#endif
+
 
 
 quint64 LNumberUtils::pow(qint64 x, uint n)
