@@ -1,9 +1,5 @@
 #include "lnumberutils.h"
 
-#ifdef Q_OS_UNIX
-    #include <math.h>
-#endif
-
 
 
 quint64 LNumberUtils::pow(qint64 x, uint n)
@@ -24,8 +20,8 @@ quint64 LNumberUtils::pow(qint64 x, uint n)
 
 int LNumberUtils::compareReals(const qreal a, const qreal b, const qreal epsilon)
 {
-    const qreal _a = fabs(a);
-    const qreal _b = fabs(b);
+    const qreal _a = qAbs(a);
+    const qreal _b = qAbs(b);
     const qreal e = (_a < _b ? _b : _a) * epsilon;
 
     if (b - a > e)

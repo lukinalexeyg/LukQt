@@ -312,22 +312,6 @@ public:
 
     static bool toBool(const QString &string, bool def, bool *ok = nullptr);
 
-    static QString concatStrings(const QString &string1, const QChar &c, const QString &string2);
-
-    static QString concatStrings(const QString &string1,
-                                 const QChar &c1,
-                                 const QString &string2,
-                                 const QChar &c2,
-                                 const QString &string3);
-
-    static QString concatStrings(const QString &string1,
-                                 const QChar &c1,
-                                 const QString &string2,
-                                 const QChar &c2,
-                                 const QString &string3,
-                                 const QChar &c3,
-                                 const QString &string4);
-
     static QString tagString(const QString &source, const QString &tag);
 
     static QString attributeString(const QString &source, const QString &attribute);

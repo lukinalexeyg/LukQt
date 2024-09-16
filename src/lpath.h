@@ -3,6 +3,8 @@
 
 #include "lukqtglobal.h"
 
+#include <QString>
+
 class LUKQT_DECLSPEC LPath
 {
 public:
@@ -21,7 +23,9 @@ public:
                               const QString &path3,
                               const QString &extension);
 
-    static QString upDirPath(const QString &path);
+    static QString up(const QString &path, int steps = 1);
+
+    static QString last(const QString &path, int count = 1);
 };
 
 #endif // LPATH_H

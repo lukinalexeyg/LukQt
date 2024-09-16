@@ -22,10 +22,9 @@ static QString s_version;
 
 int generateDump(EXCEPTION_POINTERS *exceptionPointers)
 {
-    const QString fileName = QSL("%1/%2-%3.%4").arg(s_dirPath,
+    const QString fileName = QSL("%1/%2-%3.dmp").arg(s_dirPath,
                                                     QDateTime::currentDateTime().toString(QSL("yyMMdd-hhmmss")),
-                                                    s_version,
-                                                    QSL("dmp"));
+                                                    s_version);
 
     QDir().mkpath(s_dirPath);
 

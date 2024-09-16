@@ -137,12 +137,12 @@ QString LStringUtils::_fromVariant(const QVariant &value,
             const QVariantList list = value.toList();
             QStringList stringList;
             foreach_index_inc (i, list.size())
-                stringList << _fromVariant(list.at(i),
-                                typeNameEnabled,
-                                autoFormattingEnabled,
-                                spacesEnabled,
-                                tabString,
-                                deep + 1);
+                stringList.append(_fromVariant(list.at(i),
+                                               typeNameEnabled,
+                                               autoFormattingEnabled,
+                                               spacesEnabled,
+                                               tabString,
+                                               deep + 1));
             if (!typeNameEnabled)
                 string += LChars::bracketLeft;
             string += listToString(stringList, autoFormattingEnabled, spacesEnabled, tabString, deep);
@@ -197,7 +197,7 @@ QString LStringUtils::mapToString(const T &map,
                           spacesEnabled,
                           tabString,
                           deep + 1);
-        stringList << s;
+        stringList.append(s);
     }
 
     if (!typeNameEnabled)
@@ -305,55 +305,6 @@ bool LStringUtils::toBool(const QString &string, const bool def, bool *ok)
 
 
 
-QString LStringUtils::concatStrings(const QString &string1, const QChar &c, const QString &string2)
-{
-    QString result = string1;
-    result.reserve(string1.size() + string2.size() + 1);
-    result += c;
-    result += string2;
-    return result;
-}
-
-
-
-QString LStringUtils::concatStrings(const QString &string1,
-                                    const QChar &c1,
-                                    const QString &string2,
-                                    const QChar &c2,
-                                    const QString &string3)
-{
-    QString result = string1;
-    result.reserve(string1.size() + string2.size() + string3.size() + 2);
-    result += c1;
-    result += string2;
-    result += c2;
-    result += string3;
-    return result;
-}
-
-
-
-QString LStringUtils::concatStrings(const QString &string1,
-                                    const QChar &c1,
-                                    const QString &string2,
-                                    const QChar &c2,
-                                    const QString &string3,
-                                    const QChar &c3,
-                                    const QString &string4)
-{
-    QString result = string1;
-    result.reserve(string1.size() + string2.size() + string3.size() + string4.size() + 3);
-    result += c1;
-    result += string2;
-    result += c2;
-    result += string3;
-    result += c3;
-    result += string4;
-    return result;
-}
-
-
-
 QString LStringUtils::tagString(const QString &source, const QString &tag)
 {
     return betweenString(source, QSL("<%1>").arg(tag), QSL("</%1>").arg(tag));
@@ -431,9 +382,9 @@ QString LStringUtils::wordWrapText(const QString &string,
     foreach_element_const_ref (list0, stringList) {
         const QStringList list1 = wordWrapString(list0, width, justifyOrientation, wordWrapPolicy);
         if (!list1.isEmpty())
-            resultStringList << list1;
+            resultStringList.append(list1);
         else
-            resultStringList << QString();
+            resultStringList.append(QString());
     }
 
     return resultStringList.join(LChars::Control::LF);
@@ -455,11 +406,11 @@ QStringList LStringUtils::wordWrapString(const QString &string,
     else
         foreach_index_inc (i, list0.count()) {
             if (i == 0)
-                list1 << list0.at(i);
+                list1.append(list0.at(i));
             else {
                 const QString previousWord = list0.at(i-1);
                 if (!previousWord.at(previousWord.length()-1).isDigit())
-                    list1 << list0.at(i);
+                    list1.append(list0.at(i));
                 else
                     list1.last().append(QSL(" %1").arg(list0.at(i)));
             }
@@ -471,7 +422,7 @@ QStringList LStringUtils::wordWrapString(const QString &string,
 
     foreach_element_const_ref (s, list1) {
         if (wordsCount == 0) {
-            list2 << s;
+            list2.append(s);
             ++wordsCount;
         }
 
@@ -483,7 +434,7 @@ QStringList LStringUtils::wordWrapString(const QString &string,
                 ++wordsCount;
             }
             else {
-                list2 << s;
+                list2.append(s);
                 ++line;
                 wordsCount = 1;
             }

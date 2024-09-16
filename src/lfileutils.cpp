@@ -205,6 +205,7 @@ bool LFileUtils::copyDir(const QString &sourcePath,
             WARNING_LOG_E "remove old file error:" << newPath;
             ok = false;
         }
+
         if (!QFile::copy(LPath::combine(sourcePath, f), newPath))
             ok = false;
     }

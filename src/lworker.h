@@ -10,12 +10,12 @@ class LUKQT_DECLSPEC LWorker : public QObject
     Q_OBJECT
 
 public:
-    explicit LWorker(QObject *parent);
+    explicit LWorker(QObject *threadParent);
 
 public:
-    bool autoDelete() const { return m_autoDelete; }
+    bool autoDeleteEnabled() const { return m_autoDeleteEnabled; }
 
-    void setAutoDelete(const bool autoDelete) { m_autoDelete = autoDelete; }
+    void setAutoDeleteEnabled(const bool enabled) { m_autoDeleteEnabled = enabled; }
 
     bool isThreadRunning() const;
 
@@ -35,10 +35,10 @@ signals:
     void threadTerminated();
 
 private:
-    QObject *m_parent;
     QThread *m_thread;
+    QObject *m_threadParent;
 
-    QAtomicInt m_autoDelete;
+    QAtomicInt m_autoDeleteEnabled;
 };
 
 #endif // LWORKER_H
