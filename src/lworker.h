@@ -10,7 +10,9 @@ class LUKQT_DECLSPEC LWorker : public QObject
     Q_OBJECT
 
 public:
-    explicit LWorker(QObject *threadParent);
+    explicit LWorker();
+
+    ~LWorker();
 
 public:
     bool autoDeleteEnabled() const { return m_autoDeleteEnabled; }
@@ -36,7 +38,6 @@ signals:
 
 private:
     QThread *m_thread;
-    QObject *m_threadParent;
 
     QAtomicInt m_autoDeleteEnabled;
 };

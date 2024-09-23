@@ -9,8 +9,6 @@
 class LUKQT_DECLSPEC LAppUtils
 {
 public:
-    static QStringList argumentsList(int argc, char **argv);
-
     static QDate buildDate();
 
     static QTime buildTime();

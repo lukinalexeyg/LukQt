@@ -2,11 +2,18 @@
 
 
 
-LWorker::LWorker(QObject *threadParent) :
+LWorker::LWorker() :
     m_thread{nullptr},
-    m_threadParent{threadParent},
     m_autoDeleteEnabled(true)
 {
+}
+
+
+
+LWorker::~LWorker()
+{
+    m_autoDeleteEnabled = false;
+    stopThread();
 }
 
 
@@ -20,10 +27,10 @@ bool LWorker::isThreadRunning() const
 
 void LWorker::startThread(const QString &name)
 {
-    if (m_thread != nullptr)
+    if (isThreadRunning())
         return;
 
-    m_thread = new QThread(m_threadParent);
+    m_thread = new QThread;
 
     if (!name.isEmpty())
         m_thread->setObjectName(name);
@@ -32,6 +39,8 @@ void LWorker::startThread(const QString &name)
 
     connect(m_thread, &QThread::finished, this, [this] {
         emit threadFinished();
+        m_thread->deleteLater();
+        m_thread = nullptr;
         if (m_autoDeleteEnabled)
             deleteLater();
     });
@@ -45,7 +54,7 @@ void LWorker::startThread(const QString &name)
 
 void LWorker::stopThread()
 {
-    if (m_thread == nullptr)
+    if (!isThreadRunning())
         return;
 
     m_thread->quit();
@@ -58,7 +67,7 @@ void LWorker::stopThread()
 
 void LWorker::terminateThread()
 {
-    if (m_thread == nullptr)
+    if (!isThreadRunning())
         return;
 
     m_thread->terminate();
