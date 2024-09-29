@@ -24,15 +24,82 @@ void LFileUtils::fixFileName(QString &name, const QChar &replacedChar)
 
 
 
-QByteArray LFileUtils::readTextFile(const QString &filePath,
+bool LFileUtils::isTextFile(const QString &path, const int bytesToCheck)
+{
+    QFile file(path);
+
+    if (!file.open(QFile::ReadOnly))
+        return false;
+
+    const bool isText = isTextFile(file, bytesToCheck);
+
+    file.close();
+
+    return isText;
+}
+
+
+
+bool LFileUtils::isTextFile(QFile &file, int bytesToCheck)
+{
+    const qint64 size = file.size();
+
+    if (size == 0)
+        return true;
+
+    if (bytesToCheck <= 0)
+        bytesToCheck = 32;
+
+    const qint64 _size = qMin(S_CAST(qint64, bytesToCheck), size);
+    const qint64 pos = file.pos();
+
+    char *data = new char[_size];
+
+    file.seek(0);
+    const qint64 count = file.read(data, _size);
+    file.seek(pos);
+
+    bool isText = true;
+
+    if (count > 0) {
+        static const QVector<uchar> controlCharacterIndexes = {0, 1, 2, 3, 4, 5, 6, 7, 8, 11, 12, 14, 15, 16, 17, 18,
+                                                               19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 127};
+        foreach_index_inc (i, count)
+            if (controlCharacterIndexes.indexOf((uchar)data[i]) != -1) {
+                isText = false;
+                break;
+            }
+    }
+    else
+        isText = false;
+
+    delete [] data;
+
+    return isText;
+}
+
+
+
+QByteArray LFileUtils::readTextFile(const QString &path,
                                     const qint64 maxLinesCount,
                                     const qint64 maxLineLength)
 {
-    QFile file(filePath);
+    QFile file(path);
 
     if (!file.open(QFile::ReadOnly | QFile::Text))
         return QByteArray();
 
+    const QByteArray data = readTextFile(file, maxLinesCount, maxLineLength);
+
+    file.close();
+
+    return data;
+}
+
+
+
+QByteArray LFileUtils::readTextFile(QFile &file, const qint64 maxLinesCount, const qint64 maxLineLength)
+{
     QByteArray data;
 
     if (maxLinesCount <= 0 && maxLineLength <= 0)
@@ -52,8 +119,6 @@ QByteArray LFileUtils::readTextFile(const QString &filePath,
         }
     }
 
-    file.close();
-
     return data;
 }
 
@@ -67,82 +132,72 @@ bool LFileUtils::makeEmptyDir(const QString &path)
 
 
 
-bool LFileUtils::removeDir(const QString &path)
+bool LFileUtils::removeDir(const QString &path, const bool recursively)
 {
     QDir dir(path);
-    return dir.removeRecursively();
+
+    if (recursively)
+        return dir.removeRecursively();
+
+    return dir.remove(path);
 }
 
 
 
-bool LFileUtils::clearDir(const QString &path,
+void LFileUtils::clearDir(const QString &path,
                           const QStringList &nameFilters, const QStringList &exceptNameFilters,
-                          const QDateTime &pastDateTime, const QDateTime &futureDateTime)
+                          const QDateTime &fromDateTime, const QDateTime &toDateTime,
+                          const bool recursively)
 {
-    return clearDir(path, nameFilters, wildcardsToRegularExpressions(exceptNameFilters), pastDateTime, futureDateTime);
+    clearDir(path,
+             nameFilters,
+             wildcardsToRegularExpressions(exceptNameFilters),
+             fromDateTime,
+             toDateTime,
+             recursively);
 }
 
 
 
-bool LFileUtils::clearDir(const QString &path,
+void LFileUtils::removeOldFiles(const QString &path, const QDateTime &fromDateTime, const bool recursively)
+{
+    clearDir(path, QStringList(), QStringList(), fromDateTime, QDateTime(), recursively);
+}
+
+
+
+void LFileUtils::clearDir(const QString &path,
                           const QStringList &nameFilter,
                           const QVector<QRegularExpression> &exceptNameFilterRegularExpressions,
-                          const QDateTime &pastDateTime,
-                          const QDateTime &futureDateTime)
+                          const QDateTime &fromDateTime,
+                          const QDateTime &toDateTime,
+                          const bool recursively)
 {
-    bool removed = true;
     const QDir dir(path);
+
+    if (!dir.exists())
+        return;
 
     foreach_element_ref (fileInfo, dir.entryInfoList(nameFilter, QDir::Dirs | QDir::Files | QDir::NoDotAndDotDot)) {
         if (hasMatchToRegularExpressions(exceptNameFilterRegularExpressions, fileInfo.fileName()))
             continue;
 
-        if (fileInfo.isDir()) {
-            if (!clearDir(fileInfo.absoluteFilePath(),
-                          nameFilter,
-                          exceptNameFilterRegularExpressions,
-                          pastDateTime,
-                          futureDateTime))
-                removed = false;
-        }
-        else if ((pastDateTime.isNull() || fileInfo.lastModified() < pastDateTime)
-                 && (futureDateTime.isNull() || fileInfo.lastModified() > futureDateTime)) {
-            if (!QFile::remove(fileInfo.absoluteFilePath())) {
-                removed = false;
+        if (recursively && fileInfo.isDir())
+            clearDir(fileInfo.absoluteFilePath(),
+                     nameFilter,
+                     exceptNameFilterRegularExpressions,
+                     fromDateTime,
+                     toDateTime,
+                     recursively);
+
+        else if ((fromDateTime.isNull() || fileInfo.lastModified() < fromDateTime)
+                 && (toDateTime.isNull() || fileInfo.lastModified() > toDateTime)) {
+            if (!QFile::remove(fileInfo.absoluteFilePath()))
                 WARNING_LOG "error remove file:" << fileInfo.absoluteFilePath();
-            }
         }
     }
 
-    if (dir.rmdir(path))
-        DEBUG_LOG "dir removed:" << path;
-
-    return removed;
-}
-
-
-
-bool LFileUtils::clearDirExcept(const QString &path, const QStringList &exceptNameFilter)
-{
-    const bool cleared = clearDir(path, QStringList(), exceptNameFilter, QDateTime(), QDateTime());
-
-    DEBUG_LOG "finished:" << path;
-
-    return cleared;
-}
-
-
-
-bool LFileUtils::removeOldFiles(const QString &path, const QDateTime &pastDateTime)
-{
-    const bool cleared = clearDir(path, QStringList(), QStringList(), pastDateTime, QDateTime());
-
-    if (cleared)
-        DEBUG_LOG "cleared:" << path;
-    else
-        WARNING_LOG "error clear:" << path;
-
-    return cleared;
+    dir.rmdir(path);
 }
 
 
@@ -168,10 +223,8 @@ bool LFileUtils::copyDir(const QString &sourcePath,
 {
     QDir dir(sourcePath);
 
-    if (!dir.exists()) {
-        WARNING_LOG "source directory not found:" << sourcePath;
+    if (!dir.exists())
         return false;
-    }
 
     bool ok = true;
 
@@ -181,16 +234,18 @@ bool LFileUtils::copyDir(const QString &sourcePath,
 
         const QString newPath = LPath::combine(destinationPath, d);
 
-        if (dir.mkpath(newPath)) {
-            if (!copyDir(LPath::combine(sourcePath, d),
-                         newPath,
-                         nameFilters,
-                         exceptNameFilterRegularExpressions,
-                         overwrite))
-                ok = false;
+        if (!dir.mkpath(newPath)) {
+            WARNING_LOG_E "error create directory:" << newPath;
+            ok = false;
+            continue;
         }
-        else {
-            WARNING_LOG_E "create destination directory error:" << newPath;
+
+        if (!copyDir(LPath::combine(sourcePath, d),
+                     newPath,
+                     nameFilters,
+                     exceptNameFilterRegularExpressions,
+                     overwrite)) {
+            WARNING_LOG_E "error copy directory:" << newPath;
             ok = false;
         }
     }
@@ -199,14 +254,7 @@ bool LFileUtils::copyDir(const QString &sourcePath,
         if (hasMatchToRegularExpressions(exceptNameFilterRegularExpressions, f))
             continue;
 
-        const QString newPath = LPath::combine(destinationPath, f);
-
-        if (overwrite && QFile::exists(newPath) && !QFile::remove(newPath)) {
-            WARNING_LOG_E "remove old file error:" << newPath;
-            ok = false;
-        }
-
-        if (!QFile::copy(LPath::combine(sourcePath, f), newPath))
+        if (!copyFile(LPath::combine(sourcePath, f), LPath::combine(destinationPath, f), overwrite))
             ok = false;
     }
 
@@ -215,27 +263,48 @@ bool LFileUtils::copyDir(const QString &sourcePath,
 
 
 
-bool LFileUtils::copyDirExcept(const QString &sourcePath,
-                               const QString &destinationPath,
-                               const QStringList &exceptNameFilters)
+bool LFileUtils::copyFile(const QString &sourcePath, const QString &destinationPath, const bool overwrite)
 {
-    return copyDir(sourcePath, destinationPath, QStringList(), exceptNameFilters, true);
+    if (overwrite && QFile::exists(destinationPath) && !QFile::remove(destinationPath)) {
+        WARNING_LOG_E "error remove overwritable file:" << destinationPath;
+        return false;
+    }
+
+    if (!QFile::copy(sourcePath, destinationPath)) {
+        WARNING_LOG_E "error copy file" << sourcePath << "to" << destinationPath;
+        return false;
+    }
+
+    return true;
 }
 
 
 
-QFileInfo LFileUtils::lastModifiedFileInfo(const QString &dirPath, const QStringList &nameFilters)
+QString LFileUtils::lastModifiedFilePath(const QString &dirPath,
+                                         const QStringList &nameFilters,
+                                         const bool recursively)
+{
+    return lastModifiedFileInfo(dirPath, nameFilters, recursively).absoluteFilePath();
+}
+
+
+
+QFileInfo LFileUtils::lastModifiedFileInfo(const QString &dirPath,
+                                           const QStringList &nameFilters,
+                                           const bool recursively)
 {
     QDir dir(dirPath);
     QFileInfo selectedFileInfo;
 
-    foreach_element_ref (fileInfo, dir.entryInfoList(QStringList(), QDir::Dirs | QDir::NoDotAndDotDot, QDir::Time)) {
-        const QFileInfo _fileInfo = lastModifiedFileInfo(fileInfo.absoluteFilePath(), nameFilters);
-        if (_fileInfo.lastModified() > selectedFileInfo.lastModified())
-            selectedFileInfo = _fileInfo;
-    }
+    if (recursively)
+        foreach_element_ref (fileInfo, dir.entryInfoList(QStringList(), QDir::Dirs | QDir::NoDotAndDotDot, QDir::Time)) {
+            const QFileInfo _fileInfo = lastModifiedFileInfo(fileInfo.absoluteFilePath(), nameFilters);
+            if (_fileInfo.lastModified() > selectedFileInfo.lastModified())
+                selectedFileInfo = _fileInfo;
+        }
 
     const QFileInfoList fileInfoList = dir.entryInfoList(nameFilters, QDir::Files | QDir::NoDotAndDotDot, QDir::Time);
+
     if (!fileInfoList.isEmpty()) {
         const QFileInfo fileInfo = fileInfoList.first();
         if (fileInfo.lastModified() > selectedFileInfo.lastModified())
@@ -243,13 +312,6 @@ QFileInfo LFileUtils::lastModifiedFileInfo(const QString &dirPath, const QString
     }
 
     return selectedFileInfo;
-}
-
-
-
-QString LFileUtils::lastModifiedFilePath(const QString &dirPath, const QStringList &nameFilters)
-{
-    return lastModifiedFileInfo(dirPath, nameFilters).absoluteFilePath();
 }
 
 

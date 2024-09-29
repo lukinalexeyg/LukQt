@@ -8,7 +8,7 @@
 class LUKQT_DECLSPEC LCrashHandler
 {
 public:
-    static void set(const QString &dirPath, const QString &version);
+    static void set(const QString &dirPath);
 };
 
 #endif // LCRASHHANDLER_H

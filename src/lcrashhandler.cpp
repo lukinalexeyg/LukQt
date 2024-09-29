@@ -5,6 +5,7 @@
 #include "lmacros.h"
 #include "lstringutils.h"
 
+#include <QCoreApplication>
 #include <QDateTime>
 #include <QDir>
 
@@ -64,11 +65,11 @@ LONG WINAPI exceptionFilter(EXCEPTION_POINTERS *exceptionPointers)
 
 
 
-void LCrashHandler::set(const QString &dirPath, const QString &version)
+void LCrashHandler::set(const QString &dirPath)
 {
 #ifdef Q_OS_WIN
     s_dirPath = dirPath;
-    s_version = version;
+    s_version = qApp->applicationVersion();
 
     SetErrorMode(SEM_NOGPFAULTERRORBOX);
     SetUnhandledExceptionFilter(R_CAST(LPTOP_LEVEL_EXCEPTION_FILTER, exceptionFilter));
