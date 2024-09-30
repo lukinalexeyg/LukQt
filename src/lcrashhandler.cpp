@@ -2,10 +2,11 @@
 
 #ifdef Q_OS_WIN
 
+#include "llog.h"
 #include "lmacros.h"
+#include "lpath.h"
 #include "lstringutils.h"
 
-#include <QCoreApplication>
 #include <QDateTime>
 #include <QDir>
 
@@ -23,11 +24,17 @@ static QString s_version;
 
 int generateDump(EXCEPTION_POINTERS *exceptionPointers)
 {
-    const QString fileName = QSL("%1/%2-%3.dmp").arg(s_dirPath,
-                                                    QDateTime::currentDateTime().toString(QSL("yyMMdd-hhmmss")),
-                                                    s_version);
+    if (!QDir().mkpath(s_dirPath)) {
+        WARNING_LOG_E "error create directory:" << s_dirPath;
+        return EXCEPTION_EXECUTE_HANDLER;
+    }
 
-    QDir().mkpath(s_dirPath);
+    QString fileName = LPath::combine(s_dirPath, QDateTime::currentDateTime().toString(QSL("yyMMdd-hhmmss")));
+
+    if (!s_version.isEmpty())
+        fileName.append(QSL("-%1").arg(s_version));
+
+    fileName.append(QSL(".dmp"));
 
     HANDLE hDumpFile = CreateFile(LStringUtils::toConstWCharArray(fileName),
                                   GENERIC_READ | GENERIC_WRITE,
@@ -65,11 +72,11 @@ LONG WINAPI exceptionFilter(EXCEPTION_POINTERS *exceptionPointers)
 
 
 
-void LCrashHandler::set(const QString &dirPath)
+void LCrashHandler::set(const QString &dirPath, const QString &version)
 {
 #ifdef Q_OS_WIN
     s_dirPath = dirPath;
-    s_version = qApp->applicationVersion();
+    s_version = version;
 
     SetErrorMode(SEM_NOGPFAULTERRORBOX);
     SetUnhandledExceptionFilter(R_CAST(LPTOP_LEVEL_EXCEPTION_FILTER, exceptionFilter));

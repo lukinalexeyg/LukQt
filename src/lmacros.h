@@ -3,7 +3,7 @@
 
 #include <QString>
 
-#define STR(s) #s
+#define STRINGIFY(s) #s
 
 #define QL1(s) QLatin1String(s)
 
@@ -11,7 +11,7 @@
 
 #define QBL(s) QByteArrayLiteral(s)
 
-#define QSTRING(s) QString s(STR(s))
+#define QSTRING(s) QString s(STRINGIFY(s))
 
 #define SIZE_OF_ARRAY(array) (sizeof((array)) / sizeof((array)[0]))
 
@@ -32,39 +32,43 @@
 #define q_cast(type, value) qobject_cast<type>(value)
 #define SET_QOBJECT(type, a, b) type a = q_cast(type, b)
 
-#define foreach_index_inc(i, count) for (int i = 0; i < count; ++i)
-#define foreach_index_inc_s(i, count, step) for (int i = 0; i < count; i+=step)
+#define for_index(i, count) for (int i = 0; i < count)
 
-#define foreach_index_dec(i, count) for (int i = count-1; i >= 0; --i)
-#define foreach_index_dec_s(i, count, step) for (int i = count-1; i >= 0; i-=step)
+#define for_index_inc(i, count) for (int i = 0; i < count; ++i)
+#define for_index_inc_step(i, count, step) for (int i = 0; i < count; i+=step)
 
-#define foreach_index_u_inc(i, count) for (ulong i = 0; i < count; ++i)
-#define foreach_index_u_inc_s(i, count, step) for (ulong i = 0; i < count; i+=step)
+#define for_index_dec(i, count) for (int i = count-1; i >= 0; --i)
+#define for_index_dec_step(i, count, step) for (int i = count-1; i >= 0; i-=step)
 
-#define foreach_index_u_dec(i, count) for (ulong i = count-1; i >= 0; --i)
-#define foreach_index_u_dec_s(i, count, step) for (ulong i = count-1; i >= 0; i-=step)
+#define for_index_u(i, count) for (ulong i = 0; i < count)
 
-#define foreach_element(element, container) for (const auto element : container)
-#define foreach_element_ref(element, container) for (const auto &element : container)
+#define for_index_u_inc(i, count) for (ulong i = 0; i < count; ++i)
+#define for_index_u_inc_step(i, count, step) for (ulong i = 0; i < count; i+=step)
 
-#define foreach_element_const(element, container) for (const auto element : qAsConst(container))
-#define foreach_element_const_ref(element, container) for (const auto &element : qAsConst(container))
+#define for_index_u_dec(i, count) for (ulong i = count-1; i >= 0; --i)
+#define for_index_u_dec_step(i, count, step) for (ulong i = count-1; i >= 0; i-=step)
 
-#define foreach_iterator(it, container) for (auto it = container.begin(); it != container.end();)
-#define foreach_iterator_inc(it, container) for (auto it = container.begin(); it != container.end(); ++it)
-#define foreach_iterator_dec(it, container) for (auto it = container.end()-1; it != container.begin()-1; --it)
+#define for_element_inc(element, container) for (const auto element : container)
+#define for_element_inc_const(element, container) for (const auto element : qAsConst(container))
 
-#define foreach_iterator_ptr(it, container) for (auto it = container->begin(); it != container->end();)
-#define foreach_iterator_ptr_inc(it, container) for (auto it = container->begin(); it != container->end(); ++it)
-#define foreach_iterator_ptr_dec(it, container) for (auto it = container->end()-1; it != container->begin()-1; --it)
+#define for_element_ref_inc(element, container) for (const auto &element : container)
+#define for_element_ref_inc_const(element, container) for (const auto &element : qAsConst(container))
 
-#define foreach_iterator_const(it, container) for (auto it = container.cbegin(); it != container.cend();)
-#define foreach_iterator_const_inc(it, container) for (auto it = container.cbegin(); it != container.cend(); ++it)
-#define foreach_iterator_const_dec(it, container) for (auto it = container.cend()-1; it != container.cbegin()-1; --it)
+#define for_iterator(it, container) for (auto it = container.begin(); it != container.end();)
+#define for_iterator_inc(it, container) for (auto it = container.begin(); it != container.end(); ++it)
+#define for_iterator_dec(it, container) for (auto it = container.end()-1; it != container.begin()-1; --it)
 
-#define foreach_iterator_const_ptr(it, container) for (auto it = container->cbegin(); it != container->cend();)
-#define foreach_iterator_const_ptr_inc(it, container) for (auto it = container->cbegin(); it != container->cend(); ++it)
-#define foreach_iterator_const_ptr_dec(it, container) for (auto it = container->cend()-1; it != container->cbegin()-1; --it)
+#define for_iterator_const(it, container) for (auto it = container.cbegin(); it != container.cend();)
+#define for_iterator_const_inc(it, container) for (auto it = container.cbegin(); it != container.cend(); ++it)
+#define for_iterator_const_dec(it, container) for (auto it = container.cend()-1; it != container.cbegin()-1; --it)
+
+#define for_iterator_ptr(it, container) for (auto it = container->begin(); it != container->end();)
+#define for_iterator_ptr_inc(it, container) for (auto it = container->begin(); it != container->end(); ++it)
+#define for_iterator_ptr_dec(it, container) for (auto it = container->end()-1; it != container->begin()-1; --it)
+
+#define for_iterator_const_ptr(it, container) for (auto it = container->cbegin(); it != container->cend();)
+#define for_iterator_const_ptr_inc(it, container) for (auto it = container->cbegin(); it != container->cend(); ++it)
+#define for_iterator_const_ptr_dec(it, container) for (auto it = container->cend()-1; it != container->cbegin()-1; --it)
 
 #define SORT(container) std::sort(container.begin(), container.end())
 #define SORT_FUNC(container, func) std::sort(container.begin(), container.end(), func)

@@ -136,7 +136,7 @@ QString LStringUtils::_fromVariant(const QVariant &value,
         case QVariant::Type::List: {
             const QVariantList list = value.toList();
             QStringList stringList;
-            foreach_index_inc (i, list.size())
+            for_index_inc (i, list.size())
                 stringList.append(_fromVariant(list.at(i),
                                                typeNameEnabled,
                                                autoFormattingEnabled,
@@ -186,7 +186,7 @@ QString LStringUtils::mapToString(const T &map,
     QString string;
     QStringList stringList;
 
-    foreach_iterator_const_inc (it, map) {
+    for_iterator_const_inc (it, map) {
         QString s = it.key();
         s += LChars::colon;
         if (spacesEnabled)
@@ -224,9 +224,9 @@ QString LStringUtils::listToString(const QStringList &list,
     if (autoFormattingEnabled)
         string += LChars::Control::LF;
 
-    foreach_index_inc (i, list.size()) {
+    for_index_inc (i, list.size()) {
         if (autoFormattingEnabled)
-            foreach_index_inc (t, deep)
+            for_index_inc (t, deep)
                 string += tabString;
 
         string += list.at(i);
@@ -242,7 +242,7 @@ QString LStringUtils::listToString(const QStringList &list,
 
     if (autoFormattingEnabled) {
         string += LChars::Control::LF;
-        foreach_index_inc (t, deep - 1)
+        for_index_inc (t, deep - 1)
             string += tabString;
     }
 
@@ -339,7 +339,7 @@ QString LStringUtils::removeTags(const QString &string)
 {
     QString _string = string;
 
-    foreach_index_inc (i, _string.length()) {
+    for_index_inc (i, _string.length()) {
         const int openTagIndex = _string.indexOf(LChars::less);
         const int closeTagIndex = _string.indexOf(LChars::greater);
 
@@ -379,7 +379,7 @@ QString LStringUtils::wordWrapText(const QString &string,
     const QStringList stringList = string.split(LChars::Control::LF);
     QStringList resultStringList;
 
-    foreach_element_const_ref (list0, stringList) {
+    for_element_ref_inc_const (list0, stringList) {
         const QStringList list1 = wordWrapString(list0, width, justifyOrientation, wordWrapPolicy);
         if (!list1.isEmpty())
             resultStringList.append(list1);
@@ -404,7 +404,7 @@ QStringList LStringUtils::wordWrapString(const QString &string,
     if (wordWrapPolicy == WordWrapPolicy::EnabledAfterAllChars)
         list1 = list0;
     else
-        foreach_index_inc (i, list0.count()) {
+        for_index_inc (i, list0.count()) {
             if (i == 0)
                 list1.append(list0.at(i));
             else {
@@ -420,7 +420,7 @@ QStringList LStringUtils::wordWrapString(const QString &string,
     int line = 0;
     int wordsCount = 0;
 
-    foreach_element_const_ref (s, list1) {
+    for_element_ref_inc_const (s, list1) {
         if (wordsCount == 0) {
             list2.append(s);
             ++wordsCount;
@@ -441,7 +441,7 @@ QStringList LStringUtils::wordWrapString(const QString &string,
         }
     }
 
-    foreach_index_inc (i, list2.count())
+    for_index_inc (i, list2.count())
         list2[i] = fixString(list2.at(i), width, justifyOrientation);
 
     return list2;

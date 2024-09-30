@@ -47,6 +47,6 @@ private:
 #define CRITICAL_LOG_ qCritical().noquote() << FUNCTION_NAME_AND_LINE
 #define CRITICAL_LOG CRITICAL_LOG_ <<
 
-#define DUMP(x) " {" << STR(x) << ":" << x << "} "
+#define DUMP(x) " {" << STRINGIFY(x) << ":" << x << "} "
 
 #endif // LLOG_H

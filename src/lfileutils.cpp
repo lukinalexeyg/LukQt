@@ -64,7 +64,7 @@ bool LFileUtils::isTextFile(QFile &file, int bytesToCheck)
     if (count > 0) {
         static const QVector<uchar> controlCharacterIndexes = {0, 1, 2, 3, 4, 5, 6, 7, 8, 11, 12, 14, 15, 16, 17, 18,
                                                                19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 127};
-        foreach_index_inc (i, count)
+        for_index_inc (i, count)
             if (controlCharacterIndexes.indexOf((uchar)data[i]) != -1) {
                 isText = false;
                 break;
@@ -178,7 +178,7 @@ void LFileUtils::clearDir(const QString &path,
     if (!dir.exists())
         return;
 
-    foreach_element_ref (fileInfo, dir.entryInfoList(nameFilter, QDir::Dirs | QDir::Files | QDir::NoDotAndDotDot)) {
+    for_element_ref_inc (fileInfo, dir.entryInfoList(nameFilter, QDir::Dirs | QDir::Files | QDir::NoDotAndDotDot)) {
         if (hasMatchToRegularExpressions(exceptNameFilterRegularExpressions, fileInfo.fileName()))
             continue;
 
@@ -228,7 +228,7 @@ bool LFileUtils::copyDir(const QString &sourcePath,
 
     bool ok = true;
 
-    foreach_element_ref (d, dir.entryList(nameFilters, QDir::Dirs | QDir::NoDotAndDotDot)) {
+    for_element_ref_inc (d, dir.entryList(nameFilters, QDir::Dirs | QDir::NoDotAndDotDot)) {
         if (hasMatchToRegularExpressions(exceptNameFilterRegularExpressions, d))
             continue;
 
@@ -250,7 +250,7 @@ bool LFileUtils::copyDir(const QString &sourcePath,
         }
     }
 
-    foreach_element_ref (f, dir.entryList(QDir::Files | QDir::NoDotAndDotDot)) {
+    for_element_ref_inc (f, dir.entryList(QDir::Files | QDir::NoDotAndDotDot)) {
         if (hasMatchToRegularExpressions(exceptNameFilterRegularExpressions, f))
             continue;
 
@@ -297,7 +297,7 @@ QFileInfo LFileUtils::lastModifiedFileInfo(const QString &dirPath,
     QFileInfo selectedFileInfo;
 
     if (recursively)
-        foreach_element_ref (fileInfo, dir.entryInfoList(QStringList(), QDir::Dirs | QDir::NoDotAndDotDot, QDir::Time)) {
+        for_element_ref_inc (fileInfo, dir.entryInfoList(QStringList(), QDir::Dirs | QDir::NoDotAndDotDot, QDir::Time)) {
             const QFileInfo _fileInfo = lastModifiedFileInfo(fileInfo.absoluteFilePath(), nameFilters);
             if (_fileInfo.lastModified() > selectedFileInfo.lastModified())
                 selectedFileInfo = _fileInfo;
@@ -326,7 +326,7 @@ QString LFileUtils::fileExtensionWildcard(const QString &fileExtension)
 bool LFileUtils::hasMatchToRegularExpressions(const QVector<QRegularExpression> &regularExpressions,
                                               const QString &string)
 {
-    foreach_element_const_ref (regularExpression, regularExpressions)
+    for_element_ref_inc_const (regularExpression, regularExpressions)
         if (regularExpression.match(string).hasMatch())
             return true;
 
@@ -352,7 +352,7 @@ QVector<QRegularExpression> LFileUtils::wildcardsToRegularExpressions(const QStr
     QVector<QRegularExpression> regularExpressions;
     regularExpressions.reserve(patterns.size());
 
-    foreach_element_const_ref (pattern, patterns)
+    for_element_ref_inc_const (pattern, patterns)
         regularExpressions.append(wildcardToRegularExpression(pattern, cs));
 
     return regularExpressions;
