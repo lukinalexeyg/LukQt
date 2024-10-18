@@ -83,6 +83,6 @@ void LCrashHandler::set(const QString &dirPath, const QString &applicationVersio
 
 #else
     Q_UNUSED(dirPath);
-    Q_UNUSED(version);
+    Q_UNUSED(applicationVersion);
 #endif
 }
