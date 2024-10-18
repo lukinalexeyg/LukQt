@@ -9,7 +9,7 @@
 
 
 
-void LFileUtils::fixFileName(QString &name, const QChar &replacedChar)
+QString LFileUtils::fixedFileName(const QString &name, const QChar &replacedChar)
 {
 #ifdef Q_OS_WIN
     const QString chars("<>:\"/\\|?*");
@@ -17,9 +17,13 @@ void LFileUtils::fixFileName(QString &name, const QChar &replacedChar)
     const QString chars("/");
 #endif
 
-    std::replace_if(name.begin(), name.end(), [&chars](const QChar &c) {
+    QString _name = name;
+
+    std::replace_if(_name.begin(), _name.end(), [&chars](const QChar &c) {
         return chars.contains(c);
     }, replacedChar);
+
+    return _name;
 }
 
 
@@ -42,7 +46,7 @@ bool LFileUtils::isTextFile(const QString &path, const int bytesToCheck)
 
 bool LFileUtils::isTextFile(QFile &file, int bytesToCheck)
 {
-    const qint64 size = file.size();
+    qint64 size = file.size();
 
     if (size == 0)
         return true;
@@ -50,13 +54,13 @@ bool LFileUtils::isTextFile(QFile &file, int bytesToCheck)
     if (bytesToCheck <= 0)
         bytesToCheck = 32;
 
-    const qint64 _size = qMin(S_CAST(qint64, bytesToCheck), size);
+    size = qMin(S_CAST(qint64, bytesToCheck), size);
     const qint64 pos = file.pos();
 
-    char *data = new char[_size];
+    char *data = new char[size];
 
     file.seek(0);
-    const qint64 count = file.read(data, _size);
+    const qint64 count = file.read(data, size);
     file.seek(pos);
 
     bool isText = true;
@@ -124,9 +128,11 @@ QByteArray LFileUtils::readTextFile(QFile &file, const qint64 maxLinesCount, con
 
 
 
-bool LFileUtils::makeEmptyDir(const QString &path)
+bool LFileUtils::makeDir(const QString &path, const bool empty)
 {
-    removeDir(path);
+    if (empty)
+        removeDir(path);
+
     return QDir().mkpath(path);
 }
 
@@ -155,13 +161,6 @@ void LFileUtils::clearDir(const QString &path,
              fromDateTime,
              toDateTime,
              recursively);
-}
-
-
-
-void LFileUtils::removeOldFiles(const QString &path, const QDateTime &fromDateTime, const bool recursively)
-{
-    clearDir(path, QStringList(), QStringList(), fromDateTime, QDateTime(), recursively);
 }
 
 
@@ -226,6 +225,11 @@ bool LFileUtils::copyDir(const QString &sourcePath,
     if (!dir.exists())
         return false;
 
+    if (!dir.mkpath(destinationPath)) {
+        WARNING_LOG_E "error create directory:" << destinationPath;
+        return false;
+    }
+
     bool ok = true;
 
     for_element_ref_inc (d, dir.entryList(nameFilters, QDir::Dirs | QDir::NoDotAndDotDot)) {
@@ -265,6 +269,9 @@ bool LFileUtils::copyDir(const QString &sourcePath,
 
 bool LFileUtils::copyFile(const QString &sourcePath, const QString &destinationPath, const bool overwrite)
 {
+    if (!QFile::exists(sourcePath))
+        return false;
+
     if (overwrite && QFile::exists(destinationPath) && !QFile::remove(destinationPath)) {
         WARNING_LOG_E "error remove overwritable file:" << destinationPath;
         return false;

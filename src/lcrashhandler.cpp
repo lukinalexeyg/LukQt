@@ -18,7 +18,7 @@
 #include <Windows.h>
 
 static QString s_dirPath;
-static QString s_version;
+static QString s_applicationVersion;
 
 
 
@@ -31,8 +31,8 @@ int generateDump(EXCEPTION_POINTERS *exceptionPointers)
 
     QString fileName = LPath::combine(s_dirPath, QDateTime::currentDateTime().toString(QSL("yyMMdd-hhmmss")));
 
-    if (!s_version.isEmpty())
-        fileName.append(QSL("-%1").arg(s_version));
+    if (!s_applicationVersion.isEmpty())
+        fileName.append(QSL("-%1").arg(s_applicationVersion));
 
     fileName.append(QSL(".dmp"));
 
@@ -72,11 +72,11 @@ LONG WINAPI exceptionFilter(EXCEPTION_POINTERS *exceptionPointers)
 
 
 
-void LCrashHandler::set(const QString &dirPath, const QString &version)
+void LCrashHandler::set(const QString &dirPath, const QString &applicationVersion)
 {
 #ifdef Q_OS_WIN
     s_dirPath = dirPath;
-    s_version = version;
+    s_applicationVersion = applicationVersion;
 
     SetErrorMode(SEM_NOGPFAULTERRORBOX);
     SetUnhandledExceptionFilter(R_CAST(LPTOP_LEVEL_EXCEPTION_FILTER, exceptionFilter));

@@ -10,7 +10,7 @@
 class LUKQT_DECLSPEC LFileUtils
 {
 public:
-    static void fixFileName(QString &path, const QChar &replacedChar = LChars::underscore);
+    static QString fixedFileName(const QString &path, const QChar &replacedChar = LChars::underscore);
 
     static bool isTextFile(const QString &path, int bytesToCheck = 32);
 
@@ -24,7 +24,7 @@ public:
                                    qint64 maxLinesCount = 0,
                                    qint64 maxLineLength = 0);
 
-    static bool makeEmptyDir(const QString &path);
+    static bool makeDir(const QString &path, bool empty = false);
 
     static bool removeDir(const QString &path, bool recursively = true);
 
@@ -34,8 +34,6 @@ public:
                          const QDateTime &fromDateTime = QDateTime(),
                          const QDateTime &toDateTime = QDateTime(),
                          bool recursively = true);
-
-    static void removeOldFiles(const QString &path, const QDateTime &fromDateTime, bool recursively = true);
 
     static bool copyDir(const QString &sourcePath,
                         const QString &destinationPath,

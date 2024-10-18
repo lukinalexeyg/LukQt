@@ -274,6 +274,14 @@ public:
         CP50220 = 2260
     };
 
+    enum FromVariantOption {
+        NoOptions = 0x0,
+        Indented = 0x1,
+        TypesNames = 0x2,
+        Spaces = 0x4
+    };
+    Q_DECLARE_FLAGS(FromVariantOptions, FromVariantOption)
+
     enum JustifyOrientation {
         Left,
         Right
@@ -298,11 +306,14 @@ public:
 
     static QString fromBool(bool value);
 
+    /*!
+    Converts QVariant to QString.
+    This is equivalent to QString(QJsonDocument::fromVariant(value).toJson()),
+    but is much faster and provides more options.
+    */
     static QString fromVariant(const QVariant &value,
-                               bool typeNameEnabled = true,
-                               bool autoFormattingEnabled = false,
-                               bool spacesEnabled = true,
-                               const QString &tabString = QString("    "));
+                               FromVariantOptions options = FromVariantOptions(TypesNames | Spaces),
+                               const QString &indentString = QString("    "));
 
     static wchar_t* toWCharArray(const QString &string);
 
@@ -312,15 +323,15 @@ public:
 
     static bool toBool(const QString &string, bool def, bool *ok = nullptr);
 
-    static QString tagString(const QString &source, const QString &tag);
+    static QString tag(const QString &source, const QString &tag);
 
-    static QString attributeString(const QString &source, const QString &attribute);
+    static QString attribute(const QString &source, const QString &attribute);
 
-    static QString betweenString(const QString &source, const QString &beginString, const QString &endString);
+    static QString betweenStrings(const QString &source, const QString &beginString, const QString &endString);
 
     static QString removeTags(const QString &string);
 
-    static QString chopString(const QString &string, const QString &fromWhat);
+    static QString chop(const QString &string, const QString &fromWhat);
 
     static QString wordWrapText(const QString &string,
                                 const int width,
@@ -332,31 +343,28 @@ public:
                                       const JustifyOrientation justifyOrientation = JustifyOrientation::Left,
                                       const WordWrapPolicy wordWrapPolicy = WordWrapPolicy::EnabledAfterAllChars);
 
-    static QString fixString(const QString &string,
+    static QString fixLength(const QString &string,
                              const int length,
                              const JustifyOrientation justifyOrientation = JustifyOrientation::Left);
 
 private:
     static QString _fromVariant(const QVariant &value,
-                                bool typeNameEnabled,
-                                bool autoFormattingEnabled,
-                                bool spacesEnabled,
-                                const QString &tabString,
+                                FromVariantOptions options,
+                                const QString &indentString,
                                 int deep);
 
     template<typename T>
     static QString mapToString(const T &map,
-                               bool typeNameEnabled,
-                               bool autoFormattingEnabled,
-                               bool spacesEnabled,
-                               const QString &tabString,
+                               FromVariantOptions options,
+                               const QString &indentString,
                                int deep);
 
     static QString listToString(const QStringList &list,
-                                bool autoFormattingEnabled,
-                                bool spacesEnabled,
-                                const QString &tabString,
+                                FromVariantOptions options,
+                                const QString &indentString,
                                 int deep);
 };
+
+Q_DECLARE_OPERATORS_FOR_FLAGS(LStringUtils::FromVariantOptions)
 
 #endif // LSTRINGUTILS_H

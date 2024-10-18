@@ -33,27 +33,21 @@ QString LStringUtils::fromBool(const bool value)
 
 
 
-QString LStringUtils::fromVariant(const QVariant &value,
-                                  const bool typeNameEnabled,
-                                  const bool autoFormattingEnabled,
-                                  const bool spacesEnabled,
-                                  const QString &tabString)
+QString LStringUtils::fromVariant(const QVariant &value, const FromVariantOptions options, const QString &indentString)
 {
-    return _fromVariant(value, typeNameEnabled, autoFormattingEnabled, spacesEnabled, tabString, 1);
+    return _fromVariant(value, options, indentString, 1);
 }
 
 
 
 QString LStringUtils::_fromVariant(const QVariant &value,
-                                   const bool typeNameEnabled,
-                                   const bool autoFormattingEnabled,
-                                   const bool spacesEnabled,
-                                   const QString &tabString,
+                                   const FromVariantOptions options,
+                                   const QString &indentString,
                                    const int deep)
 {
     QString string;
 
-    if (typeNameEnabled) {
+    if (options.testFlag(FromVariantOption::TypesNames)) {
         string += value.typeName();
         string += LChars::parenthesisLeft;
     }
@@ -125,10 +119,10 @@ QString LStringUtils::_fromVariant(const QVariant &value,
 
         case QVariant::Type::StringList: {
             const QStringList list = value.toStringList();
-            if (!typeNameEnabled)
+            if (!options.testFlag(FromVariantOption::TypesNames))
                 string += LChars::bracketLeft;
-            string += listToString(list, autoFormattingEnabled, spacesEnabled, tabString, deep);
-            if (!typeNameEnabled)
+            string += listToString(list, options, indentString, deep);
+            if (!options.testFlag(FromVariantOption::TypesNames))
                 string += LChars::bracketRight;
             break;
         }
@@ -137,29 +131,24 @@ QString LStringUtils::_fromVariant(const QVariant &value,
             const QVariantList list = value.toList();
             QStringList stringList;
             for_index_inc (i, list.size())
-                stringList.append(_fromVariant(list.at(i),
-                                               typeNameEnabled,
-                                               autoFormattingEnabled,
-                                               spacesEnabled,
-                                               tabString,
-                                               deep + 1));
-            if (!typeNameEnabled)
+                stringList.append(_fromVariant(list.at(i), options, indentString, deep + 1));
+            if (!options.testFlag(FromVariantOption::TypesNames))
                 string += LChars::bracketLeft;
-            string += listToString(stringList, autoFormattingEnabled, spacesEnabled, tabString, deep);
-            if (!typeNameEnabled)
+            string += listToString(stringList, options, indentString, deep);
+            if (!options.testFlag(FromVariantOption::TypesNames))
                 string += LChars::bracketRight;
             break;
         }
 
         case QVariant::Type::Map: {
             const QVariantMap map = value.toMap();
-            string += mapToString(map, typeNameEnabled, autoFormattingEnabled, spacesEnabled, tabString, deep);
+            string += mapToString(map, options, indentString, deep);
             break;
         }
 
         case QVariant::Type::Hash: {
             const QVariantHash hash = value.toHash();
-            string += mapToString(hash, typeNameEnabled, autoFormattingEnabled, spacesEnabled, tabString, deep);
+            string += mapToString(hash, options, indentString, deep);
             break;
         }
 
@@ -167,7 +156,7 @@ QString LStringUtils::_fromVariant(const QVariant &value,
             break;
     }
 
-    if (typeNameEnabled)
+    if (options.testFlag(FromVariantOption::TypesNames))
         string += LChars::parenthesisRight;
 
     return string;
@@ -177,10 +166,8 @@ QString LStringUtils::_fromVariant(const QVariant &value,
 
 template<typename T>
 QString LStringUtils::mapToString(const T &map,
-                                  const bool typeNameEnabled,
-                                  const bool autoFormattingEnabled,
-                                  const bool spacesEnabled,
-                                  const QString &tabString,
+                                  const FromVariantOptions options,
+                                  const QString &indentString,
                                   const int deep)
 {
     QString string;
@@ -189,23 +176,18 @@ QString LStringUtils::mapToString(const T &map,
     for_iterator_const_inc (it, map) {
         QString s = it.key();
         s += LChars::colon;
-        if (spacesEnabled)
+        if (options.testFlag(FromVariantOption::Spaces))
             s += LChars::space;
-        s += _fromVariant(it.value(),
-                          typeNameEnabled,
-                          autoFormattingEnabled,
-                          spacesEnabled,
-                          tabString,
-                          deep + 1);
+        s += _fromVariant(it.value(), options, indentString, deep + 1);
         stringList.append(s);
     }
 
-    if (!typeNameEnabled)
+    if (!options.testFlag(FromVariantOption::TypesNames))
         string += LChars::braceLeft;
 
-    string += listToString(stringList, autoFormattingEnabled, spacesEnabled, tabString, deep);
+    string += listToString(stringList, options, indentString, deep);
 
-    if (!typeNameEnabled)
+    if (!options.testFlag(FromVariantOption::TypesNames))
         string += LChars::braceRight;
 
     return string;
@@ -214,36 +196,35 @@ QString LStringUtils::mapToString(const T &map,
 
 
 QString LStringUtils::listToString(const QStringList &list,
-                                   const bool autoFormattingEnabled,
-                                   const bool spacesEnabled,
-                                   const QString &tabString,
+                                   const FromVariantOptions options,
+                                   const QString &indentString,
                                    const int deep)
 {
     QString string;
 
-    if (autoFormattingEnabled)
+    if (options.testFlag(FromVariantOption::Indented))
         string += LChars::Control::LF;
 
     for_index_inc (i, list.size()) {
-        if (autoFormattingEnabled)
+        if (options.testFlag(FromVariantOption::Indented))
             for_index_inc (t, deep)
-                string += tabString;
+                string += indentString;
 
         string += list.at(i);
 
         if (i < list.size()-1) {
             string += LChars::comma;
-            if (autoFormattingEnabled)
+            if (options.testFlag(FromVariantOption::Indented))
                 string += LChars::Control::LF;
-            else if (spacesEnabled)
+            else if (options.testFlag(FromVariantOption::Spaces))
                string += LChars::space;
         }
     }
 
-    if (autoFormattingEnabled) {
+    if (options.testFlag(FromVariantOption::Indented)) {
         string += LChars::Control::LF;
         for_index_inc (t, deep - 1)
-            string += tabString;
+            string += indentString;
     }
 
     return string;
@@ -305,21 +286,21 @@ bool LStringUtils::toBool(const QString &string, const bool def, bool *ok)
 
 
 
-QString LStringUtils::tagString(const QString &source, const QString &tag)
+QString LStringUtils::tag(const QString &source, const QString &tag)
 {
-    return betweenString(source, QSL("<%1>").arg(tag), QSL("</%1>").arg(tag));
+    return betweenStrings(source, QSL("<%1>").arg(tag), QSL("</%1>").arg(tag));
 }
 
 
 
-QString LStringUtils::attributeString(const QString &source, const QString &attribute)
+QString LStringUtils::attribute(const QString &source, const QString &attribute)
 {
-    return betweenString(source, QSL("%1=\"").arg(attribute), QSL("\""));
+    return betweenStrings(source, QSL("%1=\"").arg(attribute), QSL("\""));
 }
 
 
 
-QString LStringUtils::betweenString(const QString &source, const QString &beginString, const QString &endString)
+QString LStringUtils::betweenStrings(const QString &source, const QString &beginString, const QString &endString)
 {
     int beginIndex = source.indexOf(beginString);
     if (beginIndex < 0)
@@ -356,7 +337,7 @@ QString LStringUtils::removeTags(const QString &string)
 
 
 
-QString LStringUtils::chopString(const QString &string, const QString &fromWhat)
+QString LStringUtils::chop(const QString &string, const QString &fromWhat)
 {
     const int pos = string.indexOf(fromWhat);
 
@@ -442,14 +423,14 @@ QStringList LStringUtils::wordWrapString(const QString &string,
     }
 
     for_index_inc (i, list2.count())
-        list2[i] = fixString(list2.at(i), width, justifyOrientation);
+        list2[i] = fixLength(list2.at(i), width, justifyOrientation);
 
     return list2;
 }
 
 
 
-QString LStringUtils::fixString(const QString &string, const int length, const JustifyOrientation justifyOrientation)
+QString LStringUtils::fixLength(const QString &string, const int length, const JustifyOrientation justifyOrientation)
 {
     QString _string = string.simplified();
 
