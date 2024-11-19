@@ -18,7 +18,7 @@ QString LStringUtils::fromLocal8Bit(const char *string, const Mib mib, const int
 
     QTextCodec *oldTextCodec = QTextCodec::codecForLocale();
     QTextCodec::setCodecForLocale(textCodec);
-    QString newString = QString::fromLocal8Bit(string, size);
+    const QString newString = QString::fromLocal8Bit(string, size);
     QTextCodec::setCodecForLocale(oldTextCodec);
 
     return newString;
