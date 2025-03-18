@@ -312,7 +312,7 @@ public:
     but is much faster and provides more options.
     */
     static QString fromVariant(const QVariant &value,
-                               FromVariantOptions options = FromVariantOptions(TypesNames | Spaces),
+                               FromVariantOptions options = FromVariantOptions(NoOptions),
                                const QString &indentString = QString("    "));
 
     static wchar_t* toWCharArray(const QString &string);

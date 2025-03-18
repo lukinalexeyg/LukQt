@@ -69,26 +69,22 @@ QString LStringUtils::_fromVariant(const QVariant &value,
         }
 
         case QVariant::Type::Int: {
-            const int i = value.toInt();
-            string += QString::number(i);
+            string += QString::number(value.toInt());
             break;
         }
 
         case QVariant::Type::UInt: {
-            const uint i = value.toUInt();
-            string += QString::number(i);
+            string += QString::number(value.toUInt());
             break;
         }
 
         case QVariant::Type::LongLong: {
-            const qint64 i = value.toLongLong();
-            string += QString::number(i);
+            string += QString::number(value.toLongLong());
             break;
         }
 
         case QVariant::Type::ULongLong: {
-            const quint64 i = value.toULongLong();
-            string += QString::number(i);
+            string += QString::number(value.toULongLong());
             break;
         }
 

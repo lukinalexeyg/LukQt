@@ -13,6 +13,8 @@
 
 #define QSTRING(s) QString s(STRINGIFY(s))
 
+#define QBYTEARRAY(s) QByteArray s(STRINGIFY(s))
+
 #define SIZE_OF_ARRAY(array) (sizeof((array)) / sizeof((array)[0]))
 
 #define S_CAST(type, value) static_cast<type>(value)
