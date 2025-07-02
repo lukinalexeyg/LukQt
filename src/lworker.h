@@ -19,6 +19,10 @@ public:
 
     void setAutoDeleteEnabled(const bool enabled) { m_autoDeleteEnabled = enabled; }
 
+    ulong waitTimeout() const { return m_waitTimeout; }
+
+    void setWaitTimeout(const ulong timeout = ULONG_MAX) { m_waitTimeout = timeout; }
+
     bool isThreadRunning() const;
 
     void startThread(const QString &name = QString());
@@ -40,6 +44,11 @@ private:
     QThread *m_thread;
 
     QAtomicInt m_autoDeleteEnabled;
+
+    ulong m_waitTimeout;
+
+private:
+    void onThreadFinished();
 };
 
 #endif // LWORKER_H

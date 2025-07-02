@@ -15,7 +15,7 @@ public:
 
     static void exit(int returnCode = 0, int delay = 0);
 
-    static bool isRunning(const QString &systemSemaphoreKey, QSharedMemory &sharedMemory, bool create);
+    static bool isRunning(const QString &systemSemaphoreKey, QSharedMemory &sharedMemory, bool createIfMissing);
 
     static bool areRunning(const QStringList &processNames);
 

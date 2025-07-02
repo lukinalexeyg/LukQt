@@ -299,7 +299,7 @@ public:
     static QString fromIntNumber(const T number,
                                  const int length = -1,
                                  const int base = 10,
-                                 const QChar &fill = LChars::Number::zero)
+                                 const QChar &fill = LChars::Digit::zero)
     {
         return QString::number(number, base).rightJustified(length, fill);
     }

@@ -1,10 +1,13 @@
 #include "lworker.h"
 
+#include "llog.h"
+
 
 
 LWorker::LWorker() :
     m_thread{nullptr},
-    m_autoDeleteEnabled(true)
+    m_autoDeleteEnabled(true),
+    m_waitTimeout(ULONG_MAX)
 {
 }
 
@@ -37,17 +40,24 @@ void LWorker::startThread(const QString &name)
 
     moveToThread(m_thread);
 
-    connect(m_thread, &QThread::finished, this, [this] {
-        emit threadFinished();
-        m_thread->deleteLater();
-        m_thread = nullptr;
-        if (m_autoDeleteEnabled)
-            deleteLater();
-    });
+    connect(m_thread, &QThread::finished, this, &LWorker::onThreadFinished);
 
     m_thread->start();
 
     emit threadStarted();
+}
+
+
+
+void LWorker::onThreadFinished()
+{
+    emit threadFinished();
+
+    m_thread->deleteLater();
+    m_thread = nullptr;
+
+    if (m_autoDeleteEnabled)
+        deleteLater();
 }
 
 
@@ -58,9 +68,13 @@ void LWorker::stopThread()
         return;
 
     m_thread->quit();
-    m_thread->wait();
 
-    emit threadStopped();
+    if (m_thread->wait(m_waitTimeout))
+        emit threadStopped();
+    else {
+        WARNING_LOG "timeout, forcing terminate" << m_thread->objectName();
+        terminateThread();
+    }    
 }
 
 

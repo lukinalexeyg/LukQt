@@ -24,14 +24,14 @@ ulong LAppUtils::s_lastError = 0;
 
 QDate LAppUtils::buildDate()
 {
-    return QLocale(QLocale::C).toDate(QString(__DATE__).simplified(), QSL("MMM d yyyy"));
+    return QLocale::c().toDate(QSL(__DATE__).simplified(), QSL("MMM d yyyy"));
 }
 
 
 
 QTime LAppUtils::buildTime()
 {
-    return QLocale(QLocale::C).toTime(QString(__TIME__).simplified(), QSL("hh:mm:ss"));
+    return QLocale::c().toTime(QSL(__TIME__), QSL("hh:mm:ss"));
 }
 
 
@@ -43,21 +43,19 @@ void LAppUtils::exit(const int returnCode, const int delay)
 
 
 
-bool LAppUtils::isRunning(const QString &systemSemaphoreKey, QSharedMemory &sharedMemory, const bool create)
+bool LAppUtils::isRunning(const QString &systemSemaphoreKey, QSharedMemory &sharedMemory, const bool createIfMissing)
 {
     QSystemSemaphore systemSemaphore(systemSemaphoreKey, QSystemSemaphore::Create);
-    bool isRunning = false;
-
     systemSemaphore.acquire();
 
-    if (sharedMemory.attach())
-        isRunning = true;
-    else if (create)
+    const bool alreadyRunning = sharedMemory.attach();
+
+    if (!alreadyRunning && createIfMissing)
         sharedMemory.create(QSystemSemaphore::Create);
 
     systemSemaphore.release();
 
-    return isRunning;
+    return alreadyRunning;
 }
 
 
@@ -156,8 +154,7 @@ QString LAppUtils::lastErrorString()
         return QString();
 
 #ifdef Q_OS_WIN
-    const _com_error comError(s_lastError);
-    return QString::fromWCharArray(comError.ErrorMessage());
+    return QString::fromWCharArray(_com_error(s_lastError).ErrorMessage());
 #else
     return QString::fromStdString(std::system_category().message(s_lastError));
 #endif
@@ -170,6 +167,8 @@ void LAppUtils::errorBeep()
 #ifdef Q_OS_WIN
     MessageBeep(MB_ICONERROR);
 #else
-    open("/dev/console", O_WRONLY);
+    QFile console("/dev/console");
+    if (console.open(QIODevice::WriteOnly | QIODevice::Unbuffered))
+        console.write("\a");
 #endif
 }
